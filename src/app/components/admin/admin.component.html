@@ -1,0 +1,683 @@
+<div class="admin-container animate-fade">
+  <!-- <div class="header-section">
+    <div>
+      <h2>Administrative Control Panel</h2>
+      <p class="subtitle">Manage groups, teams, fixtures, players, and settle match scores</p>
+    </div>
+  </div> -->
+
+  <!-- Messages -->
+  <div *ngIf="successMessage()" class="alert alert-success">
+    <span>✅ {{ successMessage() }}</span>
+  </div>
+  <div *ngIf="errorMessage()" class="alert alert-danger">
+    <span>⚠️ {{ errorMessage() }}</span>
+  </div>
+
+  <div *ngIf="isLoading()" class="loader-container">
+    <div class="loader"></div>
+    <p>Loading administrative resources...</p>
+  </div>
+
+  <div *ngIf="!isLoading()" class="admin-grid">
+    
+    <!-- LEFT PANEL: MANAGEMENT FORMS -->
+    <div class="admin-sidebar-forms">
+      
+      <!-- FORM 0: GROUP CRUD -->
+      <div class="glass-panel form-panel">
+        <h3 *ngIf="!editingGroupId">Add Group</h3>
+        <h3 *ngIf="editingGroupId">Edit Group</h3>
+        <p class="form-desc" *ngIf="!editingGroupId">Create custom dynamic groups for your league.</p>
+        <p class="form-desc" *ngIf="editingGroupId">Rename this group.</p>
+        
+        <!-- ADD GROUP FORM -->
+        <form *ngIf="!editingGroupId" (ngSubmit)="addGroup()">
+          <div class="form-group">
+            <label for="groupNameInput">Group Name</label>
+            <input 
+              type="text" 
+              id="groupNameInput" 
+              name="groupNameInput" 
+              [(ngModel)]="newGroupName" 
+              class="form-control" 
+              placeholder="e.g. Group A" 
+              required>
+          </div>
+          <button type="submit" class="btn btn-primary w-full">➕ Add Group</button>
+        </form>
+
+        <!-- EDIT GROUP FORM -->
+        <form *ngIf="editingGroupId" (ngSubmit)="saveGroupEdit()">
+          <div class="form-group">
+            <label for="editGroupNameInput">Group Name</label>
+            <input 
+              type="text" 
+              id="editGroupNameInput" 
+              name="editGroupNameInput" 
+              [(ngModel)]="editGroupName" 
+              class="form-control" 
+              placeholder="e.g. Group A" 
+              required>
+          </div>
+          <div class="btn-group-row">
+            <button type="submit" class="btn btn-primary flex-1">💾 Save</button>
+            <button type="button" (click)="cancelGroupEdit()" class="btn btn-secondary">Cancel</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- FORM 1: TEAM CRUD -->
+      <div class="glass-panel form-panel">
+        <h3 *ngIf="!editingTeamId">Add Team to Group</h3>
+        <h3 *ngIf="editingTeamId">Edit Team</h3>
+        <p class="form-desc" *ngIf="!editingTeamId">Define teams and assign them to one of the dynamic groups.</p>
+        <p class="form-desc" *ngIf="editingTeamId">Modify team name or move the team to another group.</p>
+        
+        <!-- ADD TEAM FORM -->
+        <form *ngIf="!editingTeamId" (ngSubmit)="addTeam()">
+          <div class="form-group">
+            <label for="teamNameInput">Team Name</label>
+            <input 
+              type="text" 
+              id="teamNameInput" 
+              name="teamNameInput" 
+              [(ngModel)]="newTeamName" 
+              class="form-control" 
+              placeholder="e.g. India" 
+              required>
+          </div>
+          
+          <div class="form-group">
+            <label for="teamGroupInput">Assign Group</label>
+            <select 
+              id="teamGroupInput" 
+              name="teamGroupInput" 
+              [(ngModel)]="newTeamGroup" 
+              class="form-control">
+              <option value="" disabled>-- Select Group --</option>
+              <option *ngFor="let g of groups()" [value]="g._id">{{ g.name }}</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="teamLogoInput">Team Logo (Optional)</label>
+            <input 
+              type="text" 
+              id="teamLogoInput" 
+              name="teamLogoInput" 
+              [(ngModel)]="newTeamLogo" 
+              class="form-control" 
+              placeholder="e.g. arg.png">
+          </div>
+          
+          <button type="submit" class="btn btn-primary w-full">➕ Add Team</button>
+        </form>
+
+        <!-- EDIT TEAM FORM -->
+        <form *ngIf="editingTeamId" (ngSubmit)="saveTeamEdit()">
+          <div class="form-group">
+            <label for="editTeamNameInput">Team Name</label>
+            <input 
+              type="text" 
+              id="editTeamNameInput" 
+              name="editTeamNameInput" 
+              [(ngModel)]="editTeamName" 
+              class="form-control" 
+              placeholder="e.g. India" 
+              required>
+          </div>
+          
+          <div class="form-group">
+            <label for="editTeamGroupInput">Assign Group</label>
+            <select 
+              id="editTeamGroupInput" 
+              name="editTeamGroupInput" 
+              [(ngModel)]="editTeamGroup" 
+              class="form-control">
+              <option value="" disabled>-- Select Group --</option>
+              <option *ngFor="let g of groups()" [value]="g._id">{{ g.name }}</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="editTeamLogoInput">Team Logo (Optional)</label>
+            <input 
+              type="text" 
+              id="editTeamLogoInput" 
+              name="editTeamLogoInput" 
+              [(ngModel)]="editTeamLogo" 
+              class="form-control" 
+              placeholder="e.g. arg.png">
+          </div>
+          
+          <div class="btn-group-row">
+            <button type="submit" class="btn btn-primary flex-1">💾 Save</button>
+            <button type="button" (click)="cancelTeamEdit()" class="btn btn-secondary">Cancel</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- FORM 2: FIXTURE CRUD -->
+      <div class="glass-panel form-panel">
+        <h3 *ngIf="!editingFixtureId">Schedule Fixture</h3>
+        <h3 *ngIf="editingFixtureId">Edit Fixture</h3>
+        <p class="form-desc" *ngIf="!editingFixtureId">Create a new kickoff using teams from a selected group.</p>
+        <p class="form-desc" *ngIf="editingFixtureId">Update fixture parameters, kickoff time, or status.</p>
+        
+        <!-- ADD FIXTURE FORM -->
+        <form *ngIf="!editingFixtureId" (ngSubmit)="addFixture()">
+          <div class="form-group">
+            <label for="matchNumInput">Match Number</label>
+            <input 
+              type="number" 
+              id="matchNumInput" 
+              name="matchNumInput" 
+              [(ngModel)]="newMatchNumber" 
+              class="form-control" 
+              placeholder="e.g. 7" 
+              required>
+          </div>
+
+          <div class="form-group">
+            <label for="groupInput">Select Group</label>
+            <select 
+              id="groupInput" 
+              name="groupInput" 
+              [(ngModel)]="fixtureGroup" 
+              (change)="onFixtureGroupChange()"
+              class="form-control">
+              <option value="" disabled>-- Select Group --</option>
+              <option *ngFor="let g of groups()" [value]="g._id">{{ g.name }}</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="teamAInput">Team A</label>
+            <select 
+              id="teamAInput" 
+              name="teamAInput" 
+              [(ngModel)]="teamA" 
+              class="form-control"
+              required>
+              <option value="" disabled>-- Select Team A --</option>
+              <option *ngFor="let t of getTeamsForSelectedGroup()" [value]="t.name">
+                {{ t.name }}
+              </option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="teamBInput">Team B</label>
+            <select 
+              id="teamBInput" 
+              name="teamBInput" 
+              [(ngModel)]="teamB" 
+              class="form-control"
+              required>
+              <option value="" disabled>-- Select Team B --</option>
+              <option *ngFor="let t of getTeamsForSelectedGroup()" [value]="t.name">
+                {{ t.name }}
+              </option>
+            </select>
+            <span class="warning-text" *ngIf="teamA && teamA === teamB">
+              ⚠️ Team A and Team B cannot be the same!
+            </span>
+          </div>
+
+          <div class="form-group">
+            <label>Kickoff Time (Local)</label>
+            <div class="time-picker-row">
+              <input 
+                type="date" 
+                name="matchDate" 
+                [(ngModel)]="matchDate" 
+                class="form-control flex-2" 
+                required>
+                
+              <select 
+                name="matchTimeHour" 
+                [(ngModel)]="matchTimeHour" 
+                class="form-control flex-1">
+                <option *ngFor="let h of hoursList" [value]="h">{{ h }}</option>
+              </select>
+              
+              <span class="time-sep">:</span>
+              
+              <input 
+                type="number" 
+                min="0" 
+                max="59" 
+                name="matchTimeMinute" 
+                [(ngModel)]="matchTimeMinute" 
+                class="form-control flex-1" 
+                placeholder="MM"
+                required>
+                
+              <select 
+                name="matchTimeAmpm" 
+                [(ngModel)]="matchTimeAmpm" 
+                class="form-control flex-1">
+                <option value="AM">AM</option>
+                <option value="PM">PM</option>
+              </select>
+            </div>
+            <span class="timezone-hint">Specify date and time in your local timezone (with AM/PM).</span>
+          </div>
+
+          <div class="form-group">
+            <label for="venueInput">Venue / Stadium</label>
+            <input 
+              type="text" 
+              id="venueInput" 
+              name="venueInput" 
+              [(ngModel)]="venue" 
+              class="form-control" 
+              placeholder="e.g. MetLife Stadium, New York" >
+          </div>
+
+          <button 
+            type="submit" 
+            class="btn btn-accent w-full"
+            [disabled]="!newMatchNumber || !teamA || !teamB || !matchDate || !matchTimeHour || !matchTimeMinute || teamA === teamB">
+            📅 Create Fixture
+          </button>
+        </form>
+
+        <!-- EDIT FIXTURE FORM -->
+        <form *ngIf="editingFixtureId" (ngSubmit)="saveFixtureEdit()">
+          <div class="form-group">
+            <label for="editMatchNumInput">Match Number</label>
+            <input 
+              type="number" 
+              id="editMatchNumInput" 
+              name="editMatchNumInput" 
+              [(ngModel)]="editMatchNumber" 
+              class="form-control" 
+              placeholder="e.g. 7" 
+              required>
+          </div>
+
+          <div class="form-group">
+            <label for="editGroupInput">Select Group</label>
+            <select 
+              id="editGroupInput" 
+              name="editGroupInput" 
+              [(ngModel)]="editFixtureGroup" 
+              (change)="onEditFixtureGroupChange()"
+              class="form-control">
+              <option value="" disabled>-- Select Group --</option>
+              <option *ngFor="let g of groups()" [value]="g._id">{{ g.name }}</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="editTeamAInput">Team A</label>
+            <select 
+              id="editTeamAInput" 
+              name="editTeamAInput" 
+              [(ngModel)]="editTeamA" 
+              class="form-control"
+              required>
+              <option value="" disabled>-- Select Team A --</option>
+              <option *ngFor="let t of getTeamsForEditGroup()" [value]="t.name">
+                {{ t.name }}
+              </option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="editTeamBInput">Team B</label>
+            <select 
+              id="editTeamBInput" 
+              name="editTeamBInput" 
+              [(ngModel)]="editTeamB" 
+              class="form-control"
+              required>
+              <option value="" disabled>-- Select Team B --</option>
+              <option *ngFor="let t of getTeamsForEditGroup()" [value]="t.name">
+                {{ t.name }}
+              </option>
+            </select>
+            <span class="warning-text" *ngIf="editTeamA && editTeamA === editTeamB">
+              ⚠️ Team A and Team B cannot be the same!
+            </span>
+          </div>
+
+          <div class="form-group">
+            <label>Kickoff Time (Local)</label>
+            <div class="time-picker-row">
+              <input 
+                type="date" 
+                name="editMatchDate" 
+                [(ngModel)]="editMatchDate" 
+                class="form-control flex-2" 
+                required>
+                
+              <select 
+                name="editMatchTimeHour" 
+                [(ngModel)]="editMatchTimeHour" 
+                class="form-control flex-1">
+                <option *ngFor="let h of hoursList" [value]="h">{{ h }}</option>
+              </select>
+              
+              <span class="time-sep">:</span>
+              
+              <input 
+                type="number" 
+                min="0" 
+                max="59" 
+                name="editMatchTimeMinute" 
+                [(ngModel)]="editMatchTimeMinute" 
+                class="form-control flex-1" 
+                placeholder="MM"
+                required>
+                
+              <select 
+                name="editMatchTimeAmpm" 
+                [(ngModel)]="editMatchTimeAmpm" 
+                class="form-control flex-1">
+                <option value="AM">AM</option>
+                <option value="PM">PM</option>
+              </select>
+            </div>
+            <span class="timezone-hint">Specify date and time in your local timezone (with AM/PM).</span>
+          </div>
+
+          <div class="form-group">
+            <label for="editVenueInput">Venue / Stadium</label>
+            <input 
+              type="text" 
+              id="editVenueInput" 
+              name="editVenueInput" 
+              [(ngModel)]="editVenue" 
+              class="form-control" 
+              placeholder="e.g. MetLife Stadium, New York" >
+          </div>
+
+          <div class="form-group">
+            <label for="editStatusInput">Status</label>
+            <select 
+              id="editStatusInput" 
+              name="editStatusInput" 
+              [(ngModel)]="editStatus" 
+              class="form-control">
+              <option value="Upcoming">Upcoming</option>
+              <option value="Live">Live</option>
+              <option value="Completed">Completed</option>
+            </select>
+          </div>
+
+          <div class="btn-group-row">
+            <button 
+              type="submit" 
+              class="btn btn-accent flex-1"
+              [disabled]="!editMatchNumber || !editTeamA || !editTeamB || !editMatchDate || !editMatchTimeHour || !editMatchTimeMinute || editTeamA === editTeamB">
+              💾 Save
+            </button>
+            <button type="button" (click)="cancelFixtureEdit()" class="btn btn-secondary">
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- FORM 3: PLAYER CRUD -->
+      <div class="glass-panel form-panel">
+        <h3 *ngIf="!editingPlayerId">Add Player</h3>
+        <h3 *ngIf="editingPlayerId">Edit Player</h3>
+        <p class="form-desc" *ngIf="!editingPlayerId">Create a player account scoped under your administration.</p>
+        <p class="form-desc" *ngIf="editingPlayerId">Modify player credentials or points.</p>
+        
+        <!-- ADD PLAYER FORM -->
+        <form *ngIf="!editingPlayerId" (ngSubmit)="addPlayer()">
+          <div class="form-group">
+            <label for="playerUsername">Username</label>
+            <input 
+              type="text" 
+              id="playerUsername" 
+              name="playerUsername" 
+              [(ngModel)]="newPlayerUsername" 
+              class="form-control" 
+              placeholder="e.g. rahul" 
+              required>
+          </div>
+
+          <div class="form-group">
+            <label for="playerEmail">Email Address</label>
+            <input 
+              type="email" 
+              id="playerEmail" 
+              name="playerEmail" 
+              [(ngModel)]="newPlayerEmail" 
+              class="form-control" 
+              placeholder="e.g. rahul@example.com" 
+              required>
+          </div>
+
+          <div class="form-group">
+            <label for="playerPassword">Password</label>
+            <input 
+              type="password" 
+              id="playerPassword" 
+              name="playerPassword" 
+              [(ngModel)]="newPlayerPassword" 
+              class="form-control" 
+              placeholder="Min 6 characters" 
+              required>
+          </div>
+
+          <button type="submit" class="btn btn-primary w-full">➕ Add Player</button>
+        </form>
+
+        <!-- EDIT PLAYER FORM -->
+        <form *ngIf="editingPlayerId" (ngSubmit)="savePlayerEdit()">
+          <div class="form-group">
+            <label for="editPlayerUsername">Username</label>
+            <input 
+              type="text" 
+              id="editPlayerUsername" 
+              name="editPlayerUsername" 
+              [(ngModel)]="editPlayerUsername" 
+              class="form-control" 
+              placeholder="e.g. rahul" 
+              required>
+          </div>
+
+          <div class="form-group">
+            <label for="editPlayerEmail">Email Address</label>
+            <input 
+              type="email" 
+              id="editPlayerEmail" 
+              name="editPlayerEmail" 
+              [(ngModel)]="editPlayerEmail" 
+              class="form-control" 
+              placeholder="e.g. rahul@example.com" 
+              required>
+          </div>
+
+          <div class="form-group">
+            <label for="editPlayerPassword">Password (Leave blank to keep current)</label>
+            <input 
+              type="password" 
+              id="editPlayerPassword" 
+              name="editPlayerPassword" 
+              [(ngModel)]="editPlayerPassword" 
+              class="form-control" 
+              placeholder="Min 6 characters">
+          </div>
+
+          <div class="form-group">
+            <label for="editPlayerPoints">Total Points</label>
+            <input 
+              type="number" 
+              id="editPlayerPoints" 
+              name="editPlayerPoints" 
+              [(ngModel)]="editPlayerTotalPoints" 
+              class="form-control">
+          </div>
+
+          <div class="btn-group-row">
+            <button type="submit" class="btn btn-primary flex-1">💾 Save</button>
+            <button type="button" (click)="cancelPlayerEdit()" class="btn btn-secondary">Cancel</button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+
+    <!-- RIGHT PANEL: SETTLEMENTS & OVERVIEWS -->
+    <div class="admin-main-content">
+      
+      <!-- SCORE SETTLEMENT LIST -->
+      <div class="glass-panel content-panel">
+        <h3>Match Results & Score Settlements</h3>
+        <p class="panel-desc">Input final scores to resolve fixtures, calculate player points, and broadcast standings.</p>
+        
+        <div class="fixtures-list">
+          <div *ngFor="let match of fixtures()" class="settlement-row" [class.settled]="match.status === 'Completed'">
+            
+            <div class="row-header">
+              <span class="match-num">Match #{{ match.matchNumber }}</span>
+              <span class="status-indicator" [class.completed]="match.status === 'Completed'">
+                {{ match.status }}
+              </span>
+            </div>
+
+            <div class="settle-controls">
+              <div class="settle-team text-right">
+                <strong>{{ match.teamA }}</strong>
+              </div>
+
+              <!-- Inputs for scores -->
+              <div class="settle-score-inputs">
+                <input 
+                  type="number" 
+                  min="0" 
+                  placeholder="0"
+                  [(ngModel)]="settleScoreA[match._id]" 
+                  class="form-control settle-score-input"
+                  [disabled]="settlingIds[match._id]">
+                <span class="score-sep">-</span>
+                <input 
+                  type="number" 
+                  min="0" 
+                  placeholder="0"
+                  [(ngModel)]="settleScoreB[match._id]" 
+                  class="form-control settle-score-input"
+                  [disabled]="settlingIds[match._id]">
+              </div>
+
+              <div class="settle-team">
+                <strong>{{ match.teamB }}</strong>
+              </div>
+
+              <div class="settle-action flex-row gap-1">
+                <button 
+                  (click)="settleMatch(match)" 
+                  [disabled]="settlingIds[match._id]"
+                  class="btn btn-primary btn-settle">
+                  {{ match.status === 'Completed' ? 'Recalculate' : 'Settle' }}
+                </button>
+                <button (click)="editFixture(match)" title="Edit Fixture" class="btn btn-icon edit">✏️</button>
+                <button (click)="deleteFixture(match._id)" title="Delete Fixture" class="btn btn-icon delete">🗑️</button>
+              </div>
+            </div>
+
+            <div class="row-details">
+              <span>📍 {{ match.venue || 'No venue assigned' }}</span>
+              <span>🕒 Kickoff: {{ match.matchTime | date:'dd MMM yyyy, hh:mm a':'+05:30' }} (IST)</span>
+            </div>
+
+          </div>
+
+          <div *ngIf="fixtures().length === 0" class="no-data">
+            No fixtures scheduled yet. Build them using the form.
+          </div>
+        </div>
+      </div>
+
+      <!-- PLAYERS MANAGEMENT PANEL -->
+      <div class="glass-panel content-panel">
+        <div class="players-header-row">
+          <div>
+            <h3>Manage Registered Players ({{ players().length }})</h3>
+            <p class="panel-desc">All players created under your administration.</p>
+          </div>
+          <button (click)="shareLeaderboardToWhatsApp()" class="btn btn-whatsapp">
+            <span class="wa-icon">💬</span> Share Leaderboard
+          </button>
+        </div>
+        
+        <div class="players-table-container">
+          <table class="players-table">
+            <thead>
+              <tr>
+                <th>Username</th>
+                <th>Email Address</th>
+                <th>Total Points</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let p of players()">
+                <td><strong>{{ p.username }}</strong></td>
+                <td>{{ p.email }}</td>
+                <td><span class="points-badge">{{ p.totalPoints }} pts</span></td>
+                <td class="action-cell">
+                  <button class="btn btn-small edit" (click)="editPlayer(p)">✏️ Edit</button>
+                  <button class="btn btn-small delete" (click)="deletePlayer(p._id)">🗑️ Delete</button>
+                </td>
+              </tr>
+              <tr *ngIf="players().length === 0">
+                <td colspan="4" class="no-data">No players added under your admin profile yet. Use the Add Player form on the left.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TEAMS AND GROUPS STATS GRID -->
+      <div class="glass-panel content-panel">
+        <h3>Groups & Registered Teams ({{ teams().length }} total)</h3>
+        <p class="panel-desc">Manage dynamically added groups. Each group should contain 4 teams for a balanced tournament.</p>
+        
+        <div class="groups-grid">
+          <div *ngFor="let g of groups()" class="group-box">
+            <div class="group-header-row">
+              <h4>{{ g.name }}</h4>
+              <div class="group-header-actions">
+                <button class="btn-icon edit-group" (click)="editGroup(g)" title="Rename Group">✏️</button>
+                <button class="btn-icon delete-group" (click)="deleteGroup(g._id)" title="Delete Group">🗑️</button>
+              </div>
+            </div>
+            <div class="group-teams-list">
+              <div *ngFor="let team of (g._id ? groupedTeams[g._id] : [])" class="team-item-row">
+                <span class="team-badge">
+                  <img *ngIf="hasValidLogo(team)" [src]="'assets/' + team.logo" alt="logo" width="20" height="20" style="border-radius: 50%; margin-right: 4px; vertical-align: middle;" (error)="onImageError(team.name)">
+                  <span *ngIf="!hasValidLogo(team)">🏳️</span> {{ team.name }} 
+                  <span class="team-stats-mini">({{ team.played || 0 }} Pl | {{ team.won || 0 }}W {{ team.draw || 0 }}D {{ team.lost || 0 }}L | {{ team.points || 0 }} pts | {{ team.goalsScored || 0 }} GS)</span>
+                </span>
+                <div class="team-item-actions">
+                  <button class="btn-icon edit" (click)="editTeam(team)" title="Edit Team">✏️</button>
+                  <button class="btn-icon delete" (click)="deleteTeam(team._id)" title="Delete Team">🗑️</button>
+                </div>
+              </div>
+              <div *ngIf="!g._id || !groupedTeams[g._id] || groupedTeams[g._id].length === 0" class="no-teams">
+                No teams added
+              </div>
+            </div>
+            <div class="group-count" [class.full]="g._id && groupedTeams[g._id] && groupedTeams[g._id].length === 4">
+              {{ g._id && groupedTeams[g._id] ? groupedTeams[g._id].length : 0 }} / 4 teams
+            </div>
+          </div>
+          <div *ngIf="groups().length === 0" class="no-data w-full text-center">
+            No groups added yet. Use the Add Group form on the left.
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>

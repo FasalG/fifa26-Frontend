@@ -1,0 +1,74 @@
+<div class="leaderboard-container animate-fade">
+  <div class="header-section">
+    <div>
+      <h2>Leaderboard Standings</h2>
+      <p class="subtitle">Track office bragging rights in real-time</p>
+    </div>
+    <button (click)="loadLeaderboard()" class="btn btn-secondary">
+      🔄 Refresh Rankings
+    </button>
+  </div>
+
+  <div *ngIf="errorMessage()" class="alert alert-danger">
+    <span>⚠️ {{ errorMessage() }}</span>
+  </div>
+
+  <!-- Loader -->
+  <div *ngIf="isLoading()" class="loader-container">
+    <div class="loader"></div>
+    <p>Loading leaderboard standings...</p>
+  </div>
+
+  <!-- Board -->
+  <div *ngIf="!isLoading() && leaderboard().length > 0" class="table-container glass-panel">
+    <table class="leaderboard-table">
+      <thead>
+        <tr>
+          <th class="col-rank">Rank</th>
+          <th class="col-user">Player</th>
+          <th class="col-role">Role</th>
+          <th class="col-points text-right">Total Score</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr 
+          *ngFor="let user of leaderboard(); let idx = index" 
+          [class.highlight-me]="isCurrentUser(user)"
+          class="leaderboard-row">
+          
+          <td class="col-rank">
+            <span *ngIf="idx === 0" class="medal">🥇</span>
+            <span *ngIf="idx === 1" class="medal">🥈</span>
+            <span *ngIf="idx === 2" class="medal">🥉</span>
+            <span *ngIf="idx > 2" class="rank-number">#{{ idx + 1 }}</span>
+          </td>
+          
+          <td class="col-user">
+            <div class="player-info">
+              <span class="avatar">{{ user.username.substring(0, 2).toUpperCase() }}</span>
+              <span class="username">
+                {{ user.username }}
+                <span *ngIf="isCurrentUser(user)" class="you-badge">(You)</span>
+              </span>
+            </div>
+          </td>
+          
+          <td class="col-role">
+            <span class="role-badge" [class.admin-role]="user.role === 'admin'">
+              {{ user.role }}
+            </span>
+          </td>
+          
+          <td class="col-points text-right">
+            <strong>{{ user.totalPoints }}</strong> <span class="pts-lbl">pts</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div *ngIf="!isLoading() && leaderboard().length === 0" class="empty-state glass-panel">
+    <h4>No Standings Available</h4>
+    <p>No players have registered or earned points yet.</p>
+  </div>
+</div>

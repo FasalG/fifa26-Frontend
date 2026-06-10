@@ -1,0 +1,203 @@
+.leaderboard-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.subtitle {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+}
+
+.table-container {
+  padding: 0;
+  overflow-x: auto;
+  border-radius: var(--border-radius-lg);
+}
+
+.leaderboard-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.leaderboard-table th {
+  background-color: var(--bg-primary);
+  color: var(--text-secondary);
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.leaderboard-table td {
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 0.95rem;
+  vertical-align: middle;
+}
+
+.leaderboard-row {
+  transition: var(--transition);
+}
+
+.leaderboard-row:hover {
+  background-color: var(--bg-surface-hover);
+}
+
+.leaderboard-row.highlight-me {
+  background-color: rgba(99, 102, 241, 0.08);
+}
+
+.leaderboard-row.highlight-me td {
+  border-bottom-color: var(--primary);
+}
+
+/* Rank column */
+.col-rank {
+  width: 80px;
+}
+
+.medal {
+  font-size: 1.5rem;
+  display: inline-block;
+  line-height: 1;
+}
+
+.rank-number {
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+/* Player/User column */
+.player-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary) 0%, #a5b4fc 100%);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.75rem;
+}
+
+.username {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.you-badge {
+  color: var(--primary);
+  font-size: 0.8rem;
+  font-weight: 700;
+  margin-left: 4px;
+}
+
+/* Roles */
+.role-badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background-color: var(--bg-surface);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  text-transform: capitalize;
+}
+
+.role-badge.admin-role {
+  background-color: rgba(245, 158, 11, 0.1);
+  color: var(--warning);
+  border-color: rgba(245, 158, 11, 0.2);
+}
+
+/* Points */
+.col-points {
+  font-size: 1.1rem;
+}
+
+.col-points strong {
+  color: var(--accent);
+}
+
+.pts-lbl {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.text-right {
+  text-align: right;
+}
+
+/* Loader */
+.loader-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 0;
+  color: var(--text-secondary);
+}
+
+.loader {
+  border: 3px solid var(--border-color);
+  border-top: 3px solid var(--primary);
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 12px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+@media (max-width: 600px) {
+  .leaderboard-table th, 
+  .leaderboard-table td {
+    padding: 12px 10px;
+    font-size: 0.85rem;
+  }
+  .col-rank {
+    width: 60px;
+  }
+  .avatar {
+    width: 28px;
+    height: 28px;
+    font-size: 0.7rem;
+  }
+  .player-info {
+    gap: 8px;
+  }
+  .col-points {
+    font-size: 0.95rem;
+  }
+  .medal {
+    font-size: 1.2rem;
+  }
+}

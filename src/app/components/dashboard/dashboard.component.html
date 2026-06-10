@@ -1,0 +1,212 @@
+<div class="dashboard-container animate-fade">
+  <!-- Welcome Banner -->
+  <div class="welcome-banner glass-panel">
+    <div class="user-meta">
+      <span class="user-badge">{{ authService.currentUserSignal()?.role }}</span>
+      <h2>Welcome back, <span class="gradient-text">{{ authService.currentUserSignal()?.username }}</span>!</h2>
+      <p class="points-tracker">
+        🏆 Your Total Score: <strong>{{ authService.currentUserSignal()?.totalPoints }} Points</strong>
+      </p>
+    </div>
+    <div class="rules-quick-guide">
+      <h4>Prediction Scoring Rules:</h4>
+      <ul>
+        <li>🎯 <strong>+30 Points:</strong> Exact Scoreline Match (e.g., Pred: 2-1 | Actual: 2-1)</li>
+        <li>⚽️ <strong>+10 Points:</strong> Correct Outcome (e.g., Pred: 1-0 | Actual: 3-0)</li>
+        <li>❌ <strong>+0 Points:</strong> Incorrect prediction</li>
+        <li>⏰ <em>Predictions lock exactly 60 minutes before kickoff.</em></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Messages -->
+  <div *ngIf="errorMessage()" class="alert alert-danger">
+    <span>⚠️ {{ errorMessage() }}</span>
+  </div>
+  <div *ngIf="successMessage()" class="alert alert-success">
+    <span>✅ {{ successMessage() }}</span>
+  </div>
+
+  <!-- Section Header -->
+  <div class="section-header">
+    <div>
+      <h3>Tournament Fixtures & Predictions</h3>
+      <p class="timezone-notice">🕒 Showing all kickoffs in <strong>Indian Standard Time (IST)</strong></p>
+    </div>
+    <button (click)="loadFixtures()" class="btn btn-secondary btn-refresh">
+      🔄 Refresh Fixtures
+    </button>
+  </div>
+
+  <!-- Tabs Navigation -->
+  <div class="tabs-container glass-panel" *ngIf="!isLoading() && allFixtures().length > 0">
+    <button 
+      class="tab-btn" 
+      [class.active]="activeTab() === 'predictions'" 
+      (click)="setActiveTab('predictions')">
+      🎯 My Predictions
+    </button>
+    <button 
+      class="tab-btn" 
+      [class.active]="activeTab() === 'all'" 
+      (click)="setActiveTab('all')">
+      📅 All Fixtures & Results
+    </button>
+  </div>
+
+  <!-- Loader -->
+  <div *ngIf="isLoading()" class="loader-container">
+    <div class="loader"></div>
+    <p>Retrieving match details...</p>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!isLoading() && displayedFixtures().length === 0" class="empty-state glass-panel">
+    <div class="empty-icon">⚽️</div>
+    <h4>No Matches Found</h4>
+    <p *ngIf="activeTab() === 'predictions'">
+      No active predictions or live matches right now. Switch to the <strong>All Fixtures & Results</strong> tab to see the full tournament schedule.
+    </p>
+    <p *ngIf="activeTab() === 'all'">
+      Admin has not created any fixtures yet. Register as Admin to add teams and matches.
+    </p>
+  </div>
+
+  <!-- Fixture Cards Grid -->
+  <div class="fixtures-grid" *ngIf="!isLoading() && displayedFixtures().length > 0">
+    <div *ngFor="let match of displayedFixtures()" class="fixture-card glass-panel" [class.completed]="match.status === 'Completed'" [class.live]="match.status === 'Live'">
+      
+      <!-- Card Header -->
+      <div class="card-header">
+        <span class="match-num">Match #{{ match.matchNumber }}</span>
+        
+        <!-- Status Indicator -->
+        <span class="status-badge" [class.badge-upcoming]="match.status === 'Upcoming' && !match.isLocked" [class.badge-locked]="match.status === 'Upcoming' && match.isLocked" [class.badge-live]="match.status === 'Live'" [class.badge-completed]="match.status === 'Completed'">
+          {{ match.status === 'Completed' ? 'Completed' : (match.status === 'Live' ? 'LIVE' : (match.isLocked ? 'Locked' : 'Open')) }}
+        </span>
+      </div>
+
+      <!-- Teams Matchup Display -->
+      <div class="match-main">
+        <div class="team team-a">
+          <img *ngIf="hasValidLogo(match.teamA)" [src]="'assets/' + getTeamLogo(match.teamA)" class="team-logo-img" alt="logo" (error)="onImageError(match.teamA)">
+          <span *ngIf="!hasValidLogo(match.teamA)" class="flag-placeholder">{{ match.teamA.substring(0, 3).toUpperCase() }}</span>
+          <span class="team-name">{{ match.teamA }}</span>
+        </div>
+        
+        <!-- Real Score / VS -->
+        <div class="score-vs">
+          <ng-container *ngIf="match.status === 'Upcoming'">
+            <span class="vs">VS</span>
+          </ng-container>
+          <ng-container *ngIf="match.status !== 'Upcoming'">
+            <div class="live-score">
+              <span class="score-digit">{{ match.scoreA }}</span>
+              <span class="score-dash">-</span>
+              <span class="score-digit">{{ match.scoreB }}</span>
+            </div>
+          </ng-container>
+        </div>
+
+        <div class="team team-b">
+          <span class="team-name">{{ match.teamB }}</span>
+          <img *ngIf="hasValidLogo(match.teamB)" [src]="'assets/' + getTeamLogo(match.teamB)" class="team-logo-img" alt="logo" (error)="onImageError(match.teamB)">
+          <span *ngIf="!hasValidLogo(match.teamB)" class="flag-placeholder">{{ match.teamB.substring(0, 3).toUpperCase() }}</span>
+        </div>
+      </div>
+
+      <!-- Time & Venue -->
+      <div class="match-details">
+        <div class="detail-item time">
+          📅 {{ match.matchTime | date:'dd MMM yyyy, hh:mm a':'+05:30' }} (IST)
+        </div>
+        <div class="detail-item venue" *ngIf="match.venue">
+          📍 {{ match.venue }}
+        </div>
+      </div>
+
+      <!-- Predictions Section -->
+      <div class="prediction-section" *ngIf="activeTab() === 'predictions'">
+        
+        <!-- CASE 1: MATCH COMPLETED (Display Result, User Prediction, Points Earned) -->
+        <div *ngIf="match.status === 'Completed'" class="pred-result-completed">
+          <div class="pred-summary">
+            <span class="pred-label">Your prediction:</span>
+            <span class="pred-value" *ngIf="match.myPrediction">
+              {{ match.myPrediction.predScoreA }} - {{ match.myPrediction.predScoreB }}
+            </span>
+            <span class="pred-value empty" *ngIf="!match.myPrediction">None</span>
+          </div>
+          
+          <div class="points-earned">
+            <span class="points-badge" [class.exact]="match.myPrediction?.pointsEarned === 30" [class.outcome]="match.myPrediction?.pointsEarned === 10" [class.incorrect]="!match.myPrediction || match.myPrediction.pointsEarned === 0">
+              {{ match.myPrediction ? '+' + match.myPrediction.pointsEarned : '+0' }} PTS
+            </span>
+            <span class="points-reason">
+              {{ match.myPrediction?.pointsEarned === 30 ? 'Exact Scoreline Match' : (match.myPrediction?.pointsEarned === 10 ? 'Correct Outcome' : 'Incorrect prediction') }}
+            </span>
+          </div>
+        </div>
+
+        <!-- CASE 2: MATCH LIVE OR LOCKED (Display Read-Only Prediction) -->
+        <div *ngIf="match.status === 'Live' || (match.status === 'Upcoming' && match.isLocked)" class="pred-result-locked">
+          <div class="pred-summary">
+            <span class="pred-label">🔐 Your locked prediction:</span>
+            <span class="pred-value highlight" *ngIf="match.myPrediction">
+              {{ match.myPrediction.predScoreA }} - {{ match.myPrediction.predScoreB }}
+            </span>
+            <span class="pred-value empty" *ngIf="!match.myPrediction">No prediction made</span>
+          </div>
+          <p class="countdown-hint">{{ match.status === 'Live' ? 'Match is currently in progress.' : 'Locked: Kickoff is within 1 hour.' }}</p>
+        </div>
+
+        <!-- CASE 3: MATCH UNLOCKED & EDITABLE (Display Inline Form Inputs) -->
+        <div *ngIf="match.status === 'Upcoming' && !match.isLocked" class="pred-inputs-section">
+          <div class="inputs-row">
+            <div class="input-col">
+              <label>
+                <span class="full-name">{{ match.teamA }}</span>
+                <img *ngIf="hasValidLogo(match.teamA)" [src]="'assets/' + getTeamLogo(match.teamA)" class="team-logo-img-small" alt="logo" (error)="onImageError(match.teamA)">
+                <span *ngIf="!hasValidLogo(match.teamA)" class="short-name">{{ match.teamA.substring(0, 3).toUpperCase() }}</span>
+              </label>
+              <input 
+                type="number" 
+                min="0" 
+                placeholder="0" 
+                [(ngModel)]="predInputsA[match._id]" 
+                class="form-control score-input">
+            </div>
+            <span class="input-colon">:</span>
+            <div class="input-col">
+              <label>
+                <span class="full-name">{{ match.teamB }}</span>
+                <img *ngIf="hasValidLogo(match.teamB)" [src]="'assets/' + getTeamLogo(match.teamB)" class="team-logo-img-small" alt="logo" (error)="onImageError(match.teamB)">
+                <span *ngIf="!hasValidLogo(match.teamB)" class="short-name">{{ match.teamB.substring(0, 3).toUpperCase() }}</span>
+              </label>
+              <input 
+                type="number" 
+                min="0" 
+                placeholder="0" 
+                [(ngModel)]="predInputsB[match._id]" 
+                class="form-control score-input">
+            </div>
+          </div>
+
+          <div class="action-row">
+            <span class="countdown-timer">
+              ⏱️ {{ getCountdownText(match.matchTime) }}
+            </span>
+            <button 
+              (click)="submitPrediction(match)" 
+              [disabled]="submittingIds[match._id]"
+              class="btn btn-accent btn-save-pred">
+              {{ submittingIds[match._id] ? 'Saving...' : 'Save Prediction' }}
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>

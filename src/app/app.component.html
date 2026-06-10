@@ -1,0 +1,99 @@
+<div class="app-layout" [class.authenticated]="authService.isLoggedIn()">
+  
+  <!-- MOBILE HEADER (Only visible when logged in on small screens) -->
+  <header class="mobile-header" *ngIf="authService.isLoggedIn()">
+    <button class="hamburger-btn" (click)="toggleSidebar()">
+      ☰
+    </button>
+    <div class="mobile-logo">
+      ⚽️ FIFA 2026
+    </div>
+    <div class="mobile-profile-points">
+      🏆 {{ authService.currentUserSignal()?.totalPoints }} pts
+    </div>
+  </header>
+
+  <!-- SIDEBAR NAVIGATION PANEL (Visible when logged in) -->
+  <aside class="sidebar-aside" [class.open]="isSidebarOpen()" *ngIf="authService.isLoggedIn()">
+    <div class="sidebar-header">
+      <div class="brand">
+        <span class="brand-icon">⚽️</span>
+        <div class="brand-text">
+          <h2>FIFA 2026</h2>
+          <span class="version-badge">OFFICE LEAGUE</span>
+        </div>
+      </div>
+      <button class="close-sidebar-btn" (click)="closeSidebar()">×</button>
+    </div>
+
+    <!-- Navigation List -->
+    <nav class="sidebar-nav">
+      <a 
+        routerLink="/dashboard" 
+        routerLinkActive="active" 
+        (click)="closeSidebar()"
+        class="nav-item">
+        <span class="nav-icon">📊</span>
+        <span class="nav-label">Dashboard</span>
+      </a>
+
+      <a 
+        routerLink="/leaderboard" 
+        routerLinkActive="active" 
+        (click)="closeSidebar()"
+        class="nav-item">
+        <span class="nav-icon">🏅</span>
+        <span class="nav-label">Leaderboard</span>
+      </a>
+
+      <a 
+        *ngIf="authService.isAdmin()"
+        routerLink="/admin" 
+        routerLinkActive="active" 
+        (click)="closeSidebar()"
+        class="nav-item nav-item-admin">
+        <span class="nav-icon">⚙️</span>
+        <span class="nav-label">Admin Panel</span>
+      </a>
+    </nav>
+
+    <!-- Sidebar Footer -->
+    <div class="sidebar-footer">
+      <!-- User Profile Box -->
+      <div class="user-profile-box">
+        <div class="user-avatar">
+          {{ authService.currentUserSignal()?.username?.substring(0, 2)?.toUpperCase() }}
+        </div>
+        <div class="user-info">
+          <span class="user-name">{{ authService.currentUserSignal()?.username }}</span>
+          <span class="user-role">{{ authService.currentUserSignal()?.role }}</span>
+        </div>
+      </div>
+
+      <!-- Theme & Session Controls -->
+      <div class="footer-actions">
+        <button class="footer-btn btn-theme" (click)="toggleTheme()" title="Toggle Theme">
+          <span>{{ isLightTheme() ? '🌙 Dark Mode' : '☀️ Light Mode' }}</span>
+        </button>
+        <button class="footer-btn btn-logout" (click)="logout()">
+          <span>🚪 Sign Out</span>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Overlay for closing mobile sidebar -->
+  <div 
+    class="sidebar-overlay" 
+    *ngIf="authService.isLoggedIn() && isSidebarOpen()" 
+    (click)="closeSidebar()">
+  </div>
+
+  <!-- MAIN WORKSPACE -->
+  <main class="main-workspace">
+    <div class="content-wrapper">
+      <router-outlet></router-outlet>
+    </div>
+  </main>
+
+</div>

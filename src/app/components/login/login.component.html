@@ -1,0 +1,106 @@
+<div class="login-wrapper">
+  <div class="login-card glass-panel animate-fade">
+    <div class="brand-section">
+      <div class="logo">⚽️</div>
+      <h1>FIFA 2026</h1>
+      <p class="subtitle">World Cup Office Prediction Game</p>
+    </div>
+
+    <!-- Tab Bar -->
+    <div class="tab-bar">
+      <button 
+        [class.active]="activeTab() === 'login'" 
+        (click)="setTab('login')" 
+        class="tab-btn">
+        Sign In
+      </button>
+      <!-- <button 
+        [class.active]="activeTab() === 'register'" 
+        (click)="setTab('register')" 
+        class="tab-btn">
+        Register
+      </button> -->
+    </div>
+
+    <!-- Error/Success Banners -->
+    <div *ngIf="errorMessage()" class="alert alert-danger">
+      <span>⚠️ {{ errorMessage() }}</span>
+    </div>
+    <div *ngIf="successMessage()" class="alert alert-success">
+      <span>✅ {{ successMessage() }}</span>
+    </div>
+
+    <form (ngSubmit)="onSubmit()" #authForm="ngForm">
+      <!-- REGISTER FIELDS -->
+      <ng-container *ngIf="activeTab() === 'register'">
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input 
+            type="text" 
+            id="username" 
+            name="username" 
+            [(ngModel)]="username" 
+            class="form-control" 
+            placeholder="e.g. rahul_s" 
+            required>
+        </div>
+        <div class="form-group">
+          <label for="email">Work Email</label>
+          <input 
+            type="email" 
+            id="email" 
+            name="email" 
+            [(ngModel)]="email" 
+            class="form-control" 
+            placeholder="rahul@company.com" 
+            required>
+        </div>
+      </ng-container>
+
+      <!-- LOGIN FIELDS -->
+      <ng-container *ngIf="activeTab() === 'login'">
+        <div class="form-group">
+          <label for="loginCredential">Email or Username</label>
+          <input 
+            type="text" 
+            id="loginCredential" 
+            name="loginCredential" 
+            [(ngModel)]="loginCredential" 
+            class="form-control" 
+            placeholder="Enter username or email" 
+            required>
+        </div>
+      </ng-container>
+
+      <!-- COMMON FIELD: PASSWORD -->
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input 
+          type="password" 
+          id="password" 
+          name="password" 
+          [(ngModel)]="password" 
+          class="form-control" 
+          placeholder="••••••••" 
+          required>
+      </div>
+
+      <!-- REGISTER HINT -->
+      <div class="form-group" *ngIf="activeTab() === 'register'">
+        <p class="role-hint">Creating an account registers you as a league Administrator. You can then register and manage players inside your admin dashboard.</p>
+      </div>
+
+      <button 
+        type="submit" 
+        class="btn btn-primary w-full" 
+        [disabled]="isLoading()">
+        <span *ngIf="!isLoading()">
+          {{ activeTab() === 'login' ? 'Sign In' : 'Create Account' }}
+        </span>
+        <span *ngIf="isLoading()" class="spinner-text">
+          Processing...
+        </span>
+      </button>
+    </form>
+  </div>
+</div>
