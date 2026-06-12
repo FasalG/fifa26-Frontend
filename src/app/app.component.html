@@ -47,6 +47,15 @@
       </a>
 
       <a 
+        routerLink="/standings" 
+        routerLinkActive="active" 
+        (click)="closeSidebar()"
+        class="nav-item">
+        <span class="nav-icon">🏆</span>
+        <span class="nav-label">Group Standings</span>
+      </a>
+
+      <a 
         *ngIf="authService.isAdmin()"
         routerLink="/admin" 
         routerLinkActive="active" 

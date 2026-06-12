@@ -41,6 +41,7 @@ export interface Team {
   logo?: string;
   points?: number;
   goalsScored?: number;
+  goalsConceded?: number;
   played?: number;
   won?: number;
   lost?: number;
