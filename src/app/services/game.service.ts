@@ -222,4 +222,41 @@ export class GameService {
       { headers: this.authService.getAuthHeaders() }
     );
   }
+
+  getChatPlayers(): Observable<any[]> {
+    return this.http.get<any[]>(
+      `${this.apiUrl}/chat/players`,
+      { headers: this.authService.getAuthHeaders() }
+    );
+  }
+
+  getGroupMessages(): Observable<any[]> {
+    return this.http.get<any[]>(
+      `${this.apiUrl}/chat/group`,
+      { headers: this.authService.getAuthHeaders() }
+    );
+  }
+
+  sendGroupMessage(text: string): Observable<any> {
+    return this.http.post<any>(
+      `${this.apiUrl}/chat/group`,
+      { text },
+      { headers: this.authService.getAuthHeaders() }
+    );
+  }
+
+  getPrivateMessages(userId: string): Observable<any[]> {
+    return this.http.get<any[]>(
+      `${this.apiUrl}/chat/private/${userId}`,
+      { headers: this.authService.getAuthHeaders() }
+    );
+  }
+
+  sendPrivateMessage(userId: string, text: string): Observable<any> {
+    return this.http.post<any>(
+      `${this.apiUrl}/chat/private/${userId}`,
+      { text },
+      { headers: this.authService.getAuthHeaders() }
+    );
+  }
 }

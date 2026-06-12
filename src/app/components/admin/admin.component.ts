@@ -707,32 +707,52 @@ export class AdminComponent implements OnInit {
   }
 
   sharePredictionReminderToWhatsApp(fixture: Fixture) {
-    const kickoffTime = new Date(fixture.matchTime);
-    const options: Intl.DateTimeFormatOptions = {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true
-    };
-    const formattedTime = kickoffTime.toLocaleString('en-US', options);
+    this.gameService.getFixturePredictions(fixture._id).subscribe({
+      next: (predictions) => {
+        const kickoffTime = new Date(fixture.matchTime);
+        const options: Intl.DateTimeFormatOptions = {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: true
+        };
+        const formattedTime = kickoffTime.toLocaleString('en-US', options);
 
-    let text = `🔴🔴⏰⏰ *PREDICTION DEADLINE WARNING!* ⏰⏰🔴🔴\n`;
-    text += `---------------------------------------------\n`;
-    text += `🚨🚨 *DON'T FORGET TO PREDICT!* 🚨🚨\n\n`;
-    text += `⚽ *Upcoming Match:* *${fixture.teamA}* vs *${fixture.teamB}* (Match #${fixture.matchNumber})\n`;
-    if (fixture.venue) {
-      text += `🏟️ *Venue:* ${fixture.venue}\n`;
-    }
-    text += `📅 *Kickoff:* ${formattedTime}\n\n`;
-    text += `⚠️ *Predictions lock exactly 60 minutes before kickoff!*\n`;
-    text += `Don't forget to submit your predictions on the portal to score points and climb the leaderboard! 🏆🔥\n\n`;
-    text += `👉 *Predict Now:* ${window.location.origin}\n`;
+        const activePlayers = this.players().filter(p => p.role === 'player');
+        const notPredictedPlayers = activePlayers.filter(player => {
+          const pred = predictions.find(p => p.userId && (p.userId._id === player._id || p.userId === player._id));
+          return !pred;
+        });
 
-    const encodedText = encodeURIComponent(text);
-    const whatsappUrl = `https://api.whatsapp.com/send?text=${encodedText}`;
-    window.open(whatsappUrl, '_blank');
+        let text = `🔴🔴⏰⏰ *PREDICTION DEADLINE WARNING!* ⏰⏰🔴🔴\n`;
+        text += `---------------------------------------------\n`;
+        text += `⚽ *Upcoming Match:* *${fixture.teamA}* vs *${fixture.teamB}* (Match #${fixture.matchNumber})\n`;
+        if (fixture.venue) {
+          text += `🏟️ *Venue:* ${fixture.venue}\n`;
+        }
+        text += `📅 *Kickoff:* ${formattedTime}\n\n`;
+
+        text += `🚨 *NOT PREDICTED YET:* 🚨\n`;
+        if (notPredictedPlayers.length > 0) {
+          notPredictedPlayers.forEach(p => text += `• *${p.username}* ❌\n`);
+        } else {
+          text += `• ✅ All players have submitted predictions!\n`;
+        }
+
+        text += `\n⚠️ *Predictions lock exactly 60 minutes before kickoff!*\n`;
+        text += `Don't forget to submit your predictions on the portal to score points! 🏆🔥\n\n`;
+        text += `👉 *Predict Now:* ${window.location.origin}\n`;
+
+        const encodedText = encodeURIComponent(text);
+        const whatsappUrl = `https://api.whatsapp.com/send?text=${encodedText}`;
+        window.open(whatsappUrl, '_blank');
+      },
+      error: (err) => {
+        this.showAlert(err.error?.message || 'Error fetching predictions for reminder.', 'error');
+      }
+    });
   }
 
   shareAllPredictionsToWhatsApp(fixture: Fixture) {
