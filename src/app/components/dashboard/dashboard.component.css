@@ -134,6 +134,7 @@
   border: 1px solid var(--border-color);
   background-color: var(--bg-secondary);
   transition: transform 0.2s ease, border-color 0.2s ease;
+  padding: 16px !important;
 }
 
 .fixture-card:hover {
@@ -150,7 +151,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
 }
 
 .match-num {
@@ -204,8 +205,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 20px;
-  padding: 10px 0;
+  margin-bottom: 12px;
+  padding: 6px 0;
 }
 
 .team {
@@ -225,26 +226,26 @@
 
 .team-name {
   font-weight: 700;
-  font-size: 1.05rem;
+  font-size: 0.95rem;
 }
 
 .flag-placeholder {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--bg-surface) 0%, var(--bg-surface-hover) 100%);
   border: 1px solid var(--border-color);
-  font-size: 0.75rem;
+  font-size: 0.70rem;
   font-weight: 800;
   color: var(--text-secondary);
 }
 
 .team-logo-img {
-  width: 40px;
-  height: 40px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid var(--border-color);
@@ -289,11 +290,11 @@
 .match-details {
   border-top: 1px solid var(--border-color);
   border-bottom: 1px solid var(--border-color);
-  padding: 12px 0;
-  margin-bottom: 20px;
+  padding: 8px 0;
+  margin-bottom: 12px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
 }
 
 .detail-item {
@@ -655,3 +656,29 @@
     align-items: center;
   }
 }
+
+/* Grid Sections Separation */
+.section-wrapper {
+  margin-top: 24px;
+}
+
+.completed-section {
+  margin-top: 40px;
+  border-top: 1px dashed var(--border-color);
+  padding-top: 24px;
+}
+
+.grid-section-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.settled-title {
+  color: var(--text-muted);
+}
+

@@ -56,6 +56,14 @@ export class DashboardComponent implements OnInit {
     }
   });
 
+  openFixtures = computed(() => {
+    return this.displayedFixtures().filter(f => f.status !== 'Completed');
+  });
+
+  completedFixtures = computed(() => {
+    return this.displayedFixtures().filter(f => f.status === 'Completed');
+  });
+
   ngOnInit() {
     this.loadFixtures();
     this.loadTeams();

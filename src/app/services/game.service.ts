@@ -213,4 +213,12 @@ export class GameService {
       { headers: this.authService.getAuthHeaders() }
     );
   }
+
+  askChatbot(message: string, history: any[]): Observable<{ reply: string }> {
+    return this.http.post<{ reply: string }>(
+      `${this.apiUrl}/chat`,
+      { message, history },
+      { headers: this.authService.getAuthHeaders() }
+    );
+  }
 }

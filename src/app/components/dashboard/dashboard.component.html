@@ -73,9 +73,29 @@
     </p>
   </div>
 
-  <!-- Fixture Cards Grid -->
-  <div class="fixtures-grid" *ngIf="!isLoading() && displayedFixtures().length > 0">
-    <div *ngFor="let match of displayedFixtures()" class="fixture-card glass-panel" [class.completed]="match.status === 'Completed'" [class.live]="match.status === 'Live'">
+  <!-- Open/Live Matches Section -->
+  <div *ngIf="!isLoading() && openFixtures().length > 0" class="section-wrapper">
+    <h4 class="grid-section-title">🔥 Open for Prediction / Live</h4>
+    <div class="fixtures-grid">
+      <ng-container *ngFor="let match of openFixtures()">
+        <ng-container *ngTemplateOutlet="matchCard; context: { match: match }"></ng-container>
+      </ng-container>
+    </div>
+  </div>
+
+  <!-- Completed/Settled Matches Section -->
+  <div *ngIf="!isLoading() && completedFixtures().length > 0" class="section-wrapper completed-section">
+    <h4 class="grid-section-title settled-title">✅ Completed & Settled</h4>
+    <div class="fixtures-grid">
+      <ng-container *ngFor="let match of completedFixtures()">
+        <ng-container *ngTemplateOutlet="matchCard; context: { match: match }"></ng-container>
+      </ng-container>
+    </div>
+  </div>
+
+  <!-- Reusable Match Card Template -->
+  <ng-template #matchCard let-match="match">
+    <div class="fixture-card glass-panel" [class.completed]="match.status === 'Completed'" [class.live]="match.status === 'Live'">
       
       <!-- Card Header -->
       <div class="card-header">
@@ -209,5 +229,5 @@
       </div>
 
     </div>
-  </div>
+  </ng-template>
 </div>
