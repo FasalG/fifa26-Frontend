@@ -493,3 +493,51 @@
 .wa-icon {
   font-size: 1.2rem;
 }
+
+
+/* Settle row WhatsApp share button */
+.btn-icon.whatsapp-share {
+  background: rgba(37, 211, 102, 0.15);
+  color: #25D366;
+  border: 1px solid rgba(37, 211, 102, 0.3);
+  transition: all 0.2s ease;
+}
+
+.btn-icon.whatsapp-share:hover {
+  background: #25D366;
+  color: white !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3);
+}
+
+
+/* WhatsApp prediction reminder button styling */
+.btn-icon.whatsapp-reminder {
+  background: rgba(255, 193, 7, 0.15);
+  color: #ffc107;
+  border: 1px solid rgba(255, 193, 7, 0.3);
+  transition: all 0.2s ease;
+}
+
+.btn-icon.whatsapp-reminder:hover {
+  background: #ffc107;
+  color: #1e1e24 !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(255, 193, 7, 0.3);
+}
+
+
+/* WhatsApp share all predictions button styling */
+.btn-icon.whatsapp-all-preds {
+  background: rgba(56, 189, 248, 0.15);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  transition: all 0.2s ease;
+}
+
+.btn-icon.whatsapp-all-preds:hover {
+  background: #38bdf8;
+  color: white !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(56, 189, 248, 0.3);
+}

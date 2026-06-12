@@ -31,11 +31,11 @@ export class DashboardComponent implements OnInit {
     const tab = this.activeTab();
     const fixtures = this.allFixtures();
     const now = Date.now();
-    const oneDayInMs = 24 * 60 * 60 * 1000;
+    const twoDaysInMs = 24 * 60 * 60 * 1000;
 
     if (tab === 'predictions') {
       // "My Predictions" tab displays:
-      // 1. Upcoming matches starting within 24 hours (for prediction entry)
+      // 1. Upcoming matches starting within 48 hours (for prediction entry)
       // 2. Any Live match
       // 3. Completed or locked matches ONLY if they have the user's prediction
       return fixtures.filter(fixture => {
@@ -45,10 +45,10 @@ export class DashboardComponent implements OnInit {
         if (fixture.status === 'Completed') {
           return !!fixture.myPrediction;
         }
-        // Upcoming: show if within 24h OR if they have already predicted it
+        // Upcoming: show if within 48h OR if they have already predicted it
         const matchTime = new Date(fixture.matchTime).getTime();
-        const isWithin24Hours = (matchTime - now) <= oneDayInMs;
-        return isWithin24Hours || !!fixture.myPrediction;
+        const isWithin48Hours = (matchTime - now) <= twoDaysInMs;
+        return isWithin48Hours || !!fixture.myPrediction;
       });
     } else {
       // "All Fixtures & Results" tab displays all tournament matches

@@ -206,4 +206,11 @@ export class GameService {
       { headers: this.authService.getAuthHeaders() }
     );
   }
+
+  getFixturePredictions(id: string): Observable<any[]> {
+    return this.http.get<any[]>(
+      `${this.apiUrl}/admin/fixtures/${id}/predictions`,
+      { headers: this.authService.getAuthHeaders() }
+    );
+  }
 }

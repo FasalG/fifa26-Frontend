@@ -20,7 +20,7 @@ export class AdminComponent implements OnInit {
 
   // Dynamic Groups list
   groups = signal<Group[]>([]);
-  
+
   // Grouped teams map for rendering and filtering (key is group ID)
   groupedTeams: { [key: string]: Team[] } = {};
 
@@ -62,8 +62,8 @@ export class AdminComponent implements OnInit {
   editVenue = '';
   editStatus = 'Upcoming';
 
-  hoursList = ['01','02','03','04','05','06','07','08','09','10','11','12'];
-  
+  hoursList = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'];
+
   getUTCDateTimeString(dateStr: string, hourStr: string, minuteStr: string, ampmStr: string): string {
     if (!dateStr || !hourStr || !minuteStr) return '';
     let hour = parseInt(hourStr, 10);
@@ -75,7 +75,7 @@ export class AdminComponent implements OnInit {
     }
     const hourPad = String(hour).padStart(2, '0');
     const minPad = String(minute).padStart(2, '0');
-    
+
     const localDate = new Date(`${dateStr}T${hourPad}:${minPad}:00`);
     return localDate.toISOString();
   }
@@ -115,7 +115,7 @@ export class AdminComponent implements OnInit {
   }
 
   hasValidLogo(team: Team): boolean {
-    console.log("hasValidLogo" , team)
+    console.log("hasValidLogo", team)
     if (this.imageErrors.has(team.name)) return false;
     return !!team.logo;
   }
@@ -131,7 +131,7 @@ export class AdminComponent implements OnInit {
     this.gameService.getGroups().subscribe({
       next: (groupsData) => {
         this.groups.set(groupsData);
-        
+
         // Auto-select first group in forms if none selected yet
         if (groupsData.length > 0) {
           const firstGroupId = groupsData[0]._id || '';
@@ -155,7 +155,7 @@ export class AdminComponent implements OnInit {
               next: (teamsData) => {
                 this.teams.set(teamsData);
                 this.rebuildGroupedTeams(teamsData);
-                
+
                 this.gameService.getPlayers().subscribe({
                   next: (playersData) => {
                     this.players.set(playersData);
@@ -195,7 +195,7 @@ export class AdminComponent implements OnInit {
     this.groups().forEach(g => {
       if (g._id) map[g._id] = [];
     });
-    
+
     teamsList.forEach(team => {
       const gId = typeof team.group === 'object' ? team.group._id : team.group;
       if (gId && map[gId]) {
@@ -413,22 +413,22 @@ export class AdminComponent implements OnInit {
   editFixture(fixture: Fixture) {
     this.editingFixtureId = fixture._id;
     this.editMatchNumber = fixture.matchNumber;
-    
+
     // Find the group of the team
     const team = this.teams().find(t => t.name === fixture.teamA);
     this.editFixtureGroup = team ? (typeof team.group === 'object' ? team.group._id || '' : team.group) : '';
 
     this.editTeamA = fixture.teamA;
     this.editTeamB = fixture.teamB;
-    
+
     const localDate = new Date(fixture.matchTime);
     this.editMatchDate = this.formatDateOnly(localDate);
-    
+
     let hours = localDate.getHours();
     const ampm = hours >= 12 ? 'PM' : 'AM';
     hours = hours % 12;
     hours = hours ? hours : 12;
-    
+
     this.editMatchTimeHour = String(hours).padStart(2, '0');
     this.editMatchTimeMinute = String(localDate.getMinutes()).padStart(2, '0');
     this.editMatchTimeAmpm = ampm;
@@ -625,9 +625,9 @@ export class AdminComponent implements OnInit {
   // --- MANUAL BROADCAST ---
   shareLeaderboardToWhatsApp() {
     const sortedPlayers = [...this.players()].sort((a, b) => b.totalPoints - a.totalPoints);
-    
+
     let text = `🏆 *FIFA 2026 WORLD CUP PREDICTIONS* 🏆\n---------------------------------------------\n⭐ *CURRENT LEADERBOARD* ⭐\n\n`;
-    
+
     if (sortedPlayers.length === 0) {
       text += `No players registered yet.\n`;
     } else {
@@ -651,11 +651,124 @@ export class AdminComponent implements OnInit {
         text += `${prefix} *${p.username}* - ${p.totalPoints} pts\n`;
       });
     }
-    
+
     text += `\nKeep predicting to climb the charts! ⚽🔥\n`;
-    
+
     const encodedText = encodeURIComponent(text);
     const whatsappUrl = `https://api.whatsapp.com/send?text=${encodedText}`;
     window.open(whatsappUrl, '_blank');
+  }
+
+  shareMatchPredictionsToWhatsApp(fixture: Fixture) {
+    this.gameService.getFixturePredictions(fixture._id).subscribe({
+      next: (predictions) => {
+        const scoreA = fixture.scoreA;
+        const scoreB = fixture.scoreB;
+        
+        let text = `⚽ *MATCH COMPLETED: ${fixture.teamA} ${scoreA} - ${scoreB} ${fixture.teamB}* ⚽\n`;
+        text += `---------------------------------------------\n`;
+        text += `🏆 *Match Settlement Points Distribution* 🏆\n\n`;
+
+        const exactScorePlayers = predictions.filter(p => p.pointsEarned === 30).map(p => p.userId?.username || 'Unknown');
+        const outcomePlayers = predictions.filter(p => p.pointsEarned === 10).map(p => p.userId?.username || 'Unknown');
+        const incorrectPlayers = predictions.filter(p => p.pointsEarned === 0).map(p => p.userId?.username || 'Unknown');
+
+        text += `🎯 *30 Points (Exact Score):*\n`;
+        if (exactScorePlayers.length > 0) {
+          exactScorePlayers.forEach(name => text += `• *${name}*\n`);
+        } else {
+          text += `• None\n`;
+        }
+
+        text += `\n🏅 *10 Points (Outcome):*\n`;
+        if (outcomePlayers.length > 0) {
+          outcomePlayers.forEach(name => text += `• *${name}*\n`);
+        } else {
+          text += `• None\n`;
+        }
+
+        // text += `\n❌ *0 Points (Incorrect):*\n`;
+        // if (incorrectPlayers.length > 0) {
+        //   incorrectPlayers.forEach(name => text += `• *${name}*\n`);
+        // } else {
+        //   text += `• None\n`;
+        // }
+
+        text += `\nKeep predicting to climb the charts! ⚽🔥\n`;
+
+        const encodedText = encodeURIComponent(text);
+        const whatsappUrl = `https://api.whatsapp.com/send?text=${encodedText}`;
+        window.open(whatsappUrl, '_blank');
+      },
+      error: (err) => {
+        this.showAlert(err.error?.message || 'Error fetching predictions for share.', 'error');
+      }
+    });
+  }
+
+  sharePredictionReminderToWhatsApp(fixture: Fixture) {
+    const kickoffTime = new Date(fixture.matchTime);
+    const options: Intl.DateTimeFormatOptions = {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    };
+    const formattedTime = kickoffTime.toLocaleString('en-US', options);
+
+    let text = `🔴🔴⏰⏰ *PREDICTION DEADLINE WARNING!* ⏰⏰🔴🔴\n`;
+    text += `---------------------------------------------\n`;
+    text += `🚨🚨 *DON'T FORGET TO PREDICT!* 🚨🚨\n\n`;
+    text += `⚽ *Upcoming Match:* *${fixture.teamA}* vs *${fixture.teamB}* (Match #${fixture.matchNumber})\n`;
+    if (fixture.venue) {
+      text += `🏟️ *Venue:* ${fixture.venue}\n`;
+    }
+    text += `📅 *Kickoff:* ${formattedTime}\n\n`;
+    text += `⚠️ *Predictions lock exactly 60 minutes before kickoff!*\n`;
+    text += `Don't forget to submit your predictions on the portal to score points and climb the leaderboard! 🏆🔥\n\n`;
+    text += `👉 *Predict Now:* ${window.location.origin}\n`;
+
+    const encodedText = encodeURIComponent(text);
+    const whatsappUrl = `https://api.whatsapp.com/send?text=${encodedText}`;
+    window.open(whatsappUrl, '_blank');
+  }
+
+  shareAllPredictionsToWhatsApp(fixture: Fixture) {
+    this.gameService.getFixturePredictions(fixture._id).subscribe({
+      next: (predictions) => {
+        let text = `⚽ *PREDICTIONS LIST: ${fixture.teamA} vs ${fixture.teamB}* ⚽\n`;
+        text += `---------------------------------------------\n`;
+        if (fixture.status === 'Completed') {
+          text += `📊 *Actual Score:* *${fixture.teamA} ${fixture.scoreA} - ${fixture.scoreB} ${fixture.teamB}*\n\n`;
+        }
+        text += `📋 *What everyone predicted (Match #${fixture.matchNumber})*\n\n`;
+
+        const activePlayers = this.players().filter(p => p.role === 'player');
+
+        if (activePlayers.length === 0) {
+          text += `No players registered yet.\n`;
+        } else {
+          activePlayers.forEach(player => {
+            const pred = predictions.find(p => p.userId && (p.userId._id === player._id || p.userId === player._id));
+            if (pred) {
+              text += `• *${player.username}:* ${pred.predScoreA} - ${pred.predScoreB}\n`;
+            } else {
+              text += `• *${player.username}:* No prediction ❌\n`;
+            }
+          });
+        }
+
+        text += `\nGood luck to everyone! 🏆⚽🔥\n`;
+
+        const encodedText = encodeURIComponent(text);
+        const whatsappUrl = `https://api.whatsapp.com/send?text=${encodedText}`;
+        window.open(whatsappUrl, '_blank');
+      },
+      error: (err) => {
+        this.showAlert(err.error?.message || 'Error fetching predictions for sharing.', 'error');
+      }
+    });
   }
 }

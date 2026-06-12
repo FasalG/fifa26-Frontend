@@ -178,26 +178,46 @@
 }
 
 @media (max-width: 600px) {
+  .leaderboard-container {
+    padding: 10px;
+  }
+  .header-section {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .header-section h2 {
+    font-size: 1.4rem;
+  }
+  .header-section .btn {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+  }
   .leaderboard-table th, 
   .leaderboard-table td {
-    padding: 12px 10px;
-    font-size: 0.85rem;
+    padding: 12px 6px;
+    font-size: 0.82rem;
   }
   .col-rank {
-    width: 60px;
+    width: 45px;
+  }
+  .col-role {
+    display: none;
   }
   .avatar {
-    width: 28px;
-    height: 28px;
-    font-size: 0.7rem;
+    width: 24px;
+    height: 24px;
+    font-size: 0.65rem;
   }
   .player-info {
-    gap: 8px;
+    gap: 6px;
   }
   .col-points {
-    font-size: 0.95rem;
+    font-size: 0.9rem;
   }
   .medal {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
   }
 }

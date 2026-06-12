@@ -15,6 +15,7 @@
         <li>⚽️ <strong>+10 Points:</strong> Correct Outcome (e.g., Pred: 1-0 | Actual: 3-0)</li>
         <li>❌ <strong>+0 Points:</strong> Incorrect prediction</li>
         <li>⏰ <em>Predictions lock exactly 60 minutes before kickoff.</em></li>
+        <li>⏰ <em>Prediction entry will be start before 24 hours of each match</em></li>
       </ul>
     </div>
   </div>
@@ -200,7 +201,7 @@
               (click)="submitPrediction(match)" 
               [disabled]="submittingIds[match._id]"
               class="btn btn-accent btn-save-pred">
-              {{ submittingIds[match._id] ? 'Saving...' : 'Save Prediction' }}
+              {{ submittingIds[match._id] ? (match.myPrediction ? 'Updating...' : 'Saving...') : (match.myPrediction ? 'Update Prediction' : 'Save Prediction') }}
             </button>
           </div>
         </div>

@@ -579,6 +579,27 @@
                   class="btn btn-primary btn-settle">
                   {{ match.status === 'Completed' ? 'Recalculate' : 'Settle' }}
                 </button>
+                <button 
+                  *ngIf="match.status === 'Completed'"
+                  (click)="shareMatchPredictionsToWhatsApp(match)" 
+                  title="Share Match Results on WhatsApp" 
+                  class="btn btn-icon whatsapp-share">
+                  💬
+                </button>
+                <button 
+                  *ngIf="match.status === 'Upcoming'"
+                  (click)="sharePredictionReminderToWhatsApp(match)" 
+                  title="Send Prediction Reminder on WhatsApp" 
+                  class="btn btn-icon whatsapp-reminder">
+                  ⏰
+                </button>
+                <button 
+                  *ngIf="match.status === 'Completed'"
+                  (click)="shareAllPredictionsToWhatsApp(match)" 
+                  title="Share All Player Predictions on WhatsApp" 
+                  class="btn btn-icon whatsapp-all-preds">
+                  📋
+                </button>
                 <button (click)="editFixture(match)" title="Edit Fixture" class="btn btn-icon edit">✏️</button>
                 <button (click)="deleteFixture(match._id)" title="Delete Fixture" class="btn btn-icon delete">🗑️</button>
               </div>
