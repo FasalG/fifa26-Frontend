@@ -47,6 +47,12 @@ export class AuthService {
     );
   }
 
+  registerPlayer(username: string, email: string, password: string, adminEmail: string): Observable<User> {
+    return this.http.post<User>(`${this.apiUrl}/register-player`, { username, email, password, adminEmail }).pipe(
+      tap(user => this.handleAuthSuccess(user))
+    );
+  }
+
   login(loginCredential: string, password: string): Observable<User> {
     return this.http.post<User>(`${this.apiUrl}/login`, { loginCredential, password }).pipe(
       tap(user => this.handleAuthSuccess(user))

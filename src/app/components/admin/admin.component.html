@@ -25,7 +25,7 @@
     <div class="admin-sidebar-forms">
       
       <!-- FORM 0: GROUP CRUD -->
-      <div class="glass-panel form-panel">
+      <div class="glass-panel form-panel" *ngIf="false">
         <h3 *ngIf="!editingGroupId">Add Group</h3>
         <h3 *ngIf="editingGroupId">Edit Group</h3>
         <p class="form-desc" *ngIf="!editingGroupId">Create custom dynamic groups for your league.</p>
@@ -68,7 +68,7 @@
       </div>
 
       <!-- FORM 1: TEAM CRUD -->
-      <div class="glass-panel form-panel">
+      <div class="glass-panel form-panel" *ngIf="false">
         <h3 *ngIf="!editingTeamId">Add Team to Group</h3>
         <h3 *ngIf="editingTeamId">Edit Team</h3>
         <p class="form-desc" *ngIf="!editingTeamId">Define teams and assign them to one of the dynamic groups.</p>
@@ -580,7 +580,7 @@
                   {{ match.status === 'Completed' ? 'Recalculate' : 'Settle' }}
                 </button>
                 <button 
-                  *ngIf="match.status === 'Completed'"
+                 
                   (click)="shareMatchPredictionsToWhatsApp(match)" 
                   title="Share Match Results on WhatsApp" 
                   class="btn btn-icon whatsapp-share">
@@ -594,7 +594,7 @@
                   ⏰
                 </button>
                 <button 
-                  *ngIf="match.status === 'Completed'"
+              
                   (click)="shareAllPredictionsToWhatsApp(match)" 
                   title="Share All Player Predictions on WhatsApp" 
                   class="btn btn-icon whatsapp-all-preds">
@@ -667,7 +667,7 @@
           <div *ngFor="let g of groups()" class="group-box">
             <div class="group-header-row">
               <h4>{{ g.name }}</h4>
-              <div class="group-header-actions">
+              <div class="group-header-actions" *ngIf="false">
                 <button class="btn-icon edit-group" (click)="editGroup(g)" title="Rename Group">✏️</button>
                 <button class="btn-icon delete-group" (click)="deleteGroup(g._id)" title="Delete Group">🗑️</button>
               </div>
@@ -679,7 +679,7 @@
                   <span *ngIf="!hasValidLogo(team)">🏳️</span> {{ team.name }} 
                   <span class="team-stats-mini">({{ team.played || 0 }} Pl | {{ team.won || 0 }}W {{ team.draw || 0 }}D {{ team.lost || 0 }}L | {{ team.points || 0 }} pts | {{ team.goalsScored || 0 }} GS)</span>
                 </span>
-                <div class="team-item-actions">
+                <div class="team-item-actions" *ngIf="false">
                   <button class="btn-icon edit" (click)="editTeam(team)" title="Edit Team">✏️</button>
                   <button class="btn-icon delete" (click)="deleteTeam(team._id)" title="Delete Team">🗑️</button>
                 </div>

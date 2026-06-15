@@ -29,6 +29,7 @@
     <!-- Navigation List -->
     <nav class="sidebar-nav">
       <a 
+        *ngIf="!authService.isAdmin()"
         routerLink="/dashboard" 
         routerLinkActive="active" 
         (click)="closeSidebar()"

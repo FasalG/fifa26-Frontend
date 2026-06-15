@@ -1,0 +1,71 @@
+<div class="login-wrapper">
+  <div class="login-card glass-panel animate-fade">
+    <div class="brand-section">
+      <div class="logo">🏆</div>
+      <h1>Gully Boys</h1>
+      <p class="subtitle">Player Registration Portal</p>
+    </div>
+
+    <!-- Error/Success Banners -->
+    <div *ngIf="errorMessage()" class="alert alert-danger">
+      <span>⚠️ {{ errorMessage() }}</span>
+    </div>
+    <div *ngIf="successMessage()" class="alert alert-success">
+      <span>✅ {{ successMessage() }}</span>
+    </div>
+
+    <form (ngSubmit)="onRegister()" #registerForm="ngForm">
+      <div class="form-group">
+        <label for="username">Player Username</label>
+        <input 
+          type="text" 
+          id="username" 
+          name="username" 
+          [(ngModel)]="username" 
+          class="form-control" 
+          placeholder="e.g. striker99" 
+          required>
+      </div>
+      
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input 
+          type="email" 
+          id="email" 
+          name="email" 
+          [(ngModel)]="email" 
+          class="form-control" 
+          placeholder="player@example.com" 
+          required>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input 
+          type="password" 
+          id="password" 
+          name="password" 
+          [(ngModel)]="password" 
+          class="form-control" 
+          placeholder="••••••••" 
+          required>
+      </div>
+
+      <div class="form-group">
+        <p class="role-hint">By registering here, you will join the Gully Boys league and can start predicting matches immediately!</p>
+      </div>
+
+      <button 
+        type="submit" 
+        class="btn btn-primary w-full" 
+        [disabled]="isLoading()">
+        <span *ngIf="!isLoading()">Join League</span>
+        <span *ngIf="isLoading()" class="spinner-text">Registering...</span>
+      </button>
+      
+      <div style="margin-top: 1rem; text-align: center;">
+        <a routerLink="/login" style="color: #00ffcc; text-decoration: none; font-size: 0.9rem;">Already registered? Sign in here</a>
+      </div>
+    </form>
+  </div>
+</div>
