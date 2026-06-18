@@ -31,38 +31,110 @@
         </tr>
       </thead>
       <tbody>
-        <tr 
-          *ngFor="let user of leaderboard(); let idx = index" 
-          [class.highlight-me]="isCurrentUser(user)"
-          class="leaderboard-row">
-          
-          <td class="col-rank">
-            <span *ngIf="idx === 0" class="medal">🥇</span>
-            <span *ngIf="idx === 1" class="medal">🥈</span>
-            <span *ngIf="idx === 2" class="medal">🥉</span>
-            <span *ngIf="idx > 2" class="rank-number">#{{ idx + 1 }}</span>
-          </td>
-          
-          <td class="col-user">
-            <div class="player-info">
-              <span class="avatar">{{ user.username.substring(0, 2).toUpperCase() }}</span>
-              <span class="username">
-                {{ user.username }}
-                <span *ngIf="isCurrentUser(user)" class="you-badge">(You)</span>
+        <ng-container *ngFor="let user of leaderboard(); let idx = index">
+          <tr 
+            (click)="togglePlayerHistory(user._id)"
+            [class.highlight-me]="isCurrentUser(user)"
+            [class.expanded-row]="expandedPlayerId() === user._id"
+            class="leaderboard-row clickable-row">
+            
+            <td class="col-rank">
+              <span *ngIf="user.rank === 1" class="medal">🥇</span>
+              <span *ngIf="user.rank === 2" class="medal">🥈</span>
+              <span *ngIf="user.rank === 3" class="medal">🥉</span>
+              <span *ngIf="user.rank && user.rank > 3" class="rank-number">#{{ user.rank }}</span>
+            </td>
+            
+            <td class="col-user">
+              <div class="player-info">
+                <span class="avatar">{{ user.username.substring(0, 2).toUpperCase() }}</span>
+                <span class="username">
+                  {{ user.username }}
+                  <span *ngIf="isCurrentUser(user)" class="you-badge">(You)</span>
+                </span>
+                <span class="expand-indicator" [class.rotated]="expandedPlayerId() === user._id">▼</span>
+              </div>
+            </td>
+            
+            <td class="col-role">
+              <span class="role-badge" [class.admin-role]="user.role === 'admin'">
+                {{ user.role }}
               </span>
-            </div>
-          </td>
-          
-          <td class="col-role">
-            <span class="role-badge" [class.admin-role]="user.role === 'admin'">
-              {{ user.role }}
-            </span>
-          </td>
-          
-          <td class="col-points text-right">
-            <strong>{{ user.totalPoints }}</strong> <span class="pts-lbl">pts</span>
-          </td>
-        </tr>
+            </td>
+            
+            <td class="col-points text-right">
+              <strong>{{ user.totalPoints }}</strong> <span class="pts-lbl">pts</span>
+            </td>
+          </tr>
+
+          <!-- Expanded prediction history row -->
+          <tr *ngIf="expandedPlayerId() === user._id" class="history-expansion-row">
+            <td colspan="4" class="history-td">
+              <div class="history-container glass-panel animate-fade">
+                <div class="history-header">
+                  <h5>{{ user.username }}'s Prediction History</h5>
+                  <p class="history-hint">Showing only locked & completed matches</p>
+                </div>
+
+                <!-- Loading State -->
+                <div *ngIf="loadingHistories()[user._id]" class="history-loader">
+                  <div class="mini-loader"></div>
+                  <span>Loading history...</span>
+                </div>
+
+                <!-- History List -->
+                <div *ngIf="!loadingHistories()[user._id] && playerHistories()[user._id]?.length" class="history-table-wrapper">
+                  <table class="history-table">
+                    <thead>
+                      <tr>
+                        <th>Match</th>
+                        <th class="text-center">Prediction</th>
+                        <th class="text-center">Actual Score</th>
+                        <th class="text-right">Points</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr *ngFor="let pred of playerHistories()[user._id] || []" class="history-row">
+                        <td class="hist-match">
+                          <span class="match-num">#{{ pred.matchNumber }}</span>
+                          <span class="matchup-teams">{{ pred.teamA }} vs {{ pred.teamB }}</span>
+                        </td>
+                        <td class="hist-score text-center">
+                          <span class="score-badge pred-badge">{{ pred.predScoreA }} - {{ pred.predScoreB }}</span>
+                        </td>
+                        <td class="hist-score text-center">
+                          <span *ngIf="pred.status === 'Completed'" class="score-badge actual-badge">
+                            {{ pred.actualScoreA }} - {{ pred.actualScoreB }}
+                          </span>
+                          <span *ngIf="pred.status === 'Live'" class="score-badge live-badge">
+                            {{ pred.actualScoreA }} - {{ pred.actualScoreB }} (Live)
+                          </span>
+                          <span *ngIf="pred.status === 'Upcoming'" class="score-badge locked-badge">
+                            🔒 Locked
+                          </span>
+                        </td>
+                        <td class="hist-points text-right">
+                          <span 
+                            [class.pts-exact]="pred.pointsEarned === 30"
+                            [class.pts-outcome]="pred.pointsEarned === 10"
+                            [class.pts-zero]="pred.pointsEarned === 0"
+                            class="pts-earned-badge">
+                            {{ pred.pointsEarned >= 0 ? '+' : '' }}{{ pred.pointsEarned }} pts
+                          </span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <!-- Empty State -->
+                <div *ngIf="!loadingHistories()[user._id] && !playerHistories()[user._id]?.length" class="history-empty">
+                  <span>No completed or locked predictions yet.</span>
+                </div>
+              </div>
+            </td>
+          </tr>
+        </ng-container>
       </tbody>
     </table>
   </div>

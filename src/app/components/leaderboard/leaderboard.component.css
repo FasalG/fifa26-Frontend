@@ -221,3 +221,235 @@
     font-size: 1.1rem;
   }
 }
+
+/* Clickable row indicator */
+.clickable-row {
+  cursor: pointer;
+}
+
+.clickable-row:active {
+  background-color: var(--bg-surface-hover);
+}
+
+.expand-indicator {
+  margin-left: auto;
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  transition: transform 0.2s ease-in-out;
+  opacity: 0.7;
+}
+
+.expand-indicator.rotated {
+  transform: rotate(180deg);
+  color: var(--primary);
+}
+
+/* Row states */
+.leaderboard-row.expanded-row {
+  background-color: rgba(99, 102, 241, 0.04);
+}
+
+.history-expansion-row {
+  background-color: transparent !important;
+}
+
+.history-expansion-row:hover {
+  background-color: transparent !important;
+}
+
+.history-td {
+  padding: 0 24px 16px 24px !important;
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* Accordion Container */
+.history-container {
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.015);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--border-radius-md);
+  margin-top: -4px;
+}
+
+.history-header {
+  margin-bottom: 16px;
+}
+
+.history-header h5 {
+  margin: 0 0 4px 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.history-hint {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+/* History table */
+.history-table-wrapper {
+  overflow-x: auto;
+}
+
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.history-table th {
+  padding: 10px 16px;
+  background-color: rgba(0, 0, 0, 0.2) !important;
+  color: var(--text-secondary);
+  font-weight: 600;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.history-table td {
+  padding: 12px 16px !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
+  vertical-align: middle;
+}
+
+.history-row:last-child td {
+  border-bottom: none !important;
+}
+
+.hist-match {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.match-num {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--primary);
+  text-transform: uppercase;
+}
+
+.matchup-teams {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.text-center {
+  text-align: center;
+}
+
+/* Badges */
+.score-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 0.8rem;
+  font-family: monospace;
+}
+
+.pred-badge {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: var(--text-secondary);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.actual-badge {
+  background-color: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.live-badge {
+  background-color: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  animation: pulse 2s infinite;
+}
+
+.locked-badge {
+  background-color: rgba(245, 158, 11, 0.1);
+  color: var(--warning);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.6; }
+  100% { opacity: 1; }
+}
+
+/* Points badge colors */
+.pts-earned-badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 0.8rem;
+}
+
+.pts-exact {
+  background-color: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.2);
+}
+
+.pts-outcome {
+  background-color: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.pts-zero {
+  background-color: rgba(255, 255, 255, 0.04);
+  color: var(--text-muted);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Loading & Empty States */
+.history-loader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 24px 0;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+
+.mini-loader {
+  border: 2px solid var(--border-color);
+  border-top: 2px solid var(--primary);
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  animation: spin 0.8s linear infinite;
+}
+
+.history-empty {
+  text-align: center;
+  padding: 24px 0;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+/* Responsive updates */
+@media (max-width: 600px) {
+  .history-td {
+    padding: 0 6px 12px 6px !important;
+  }
+  .history-container {
+    padding: 12px 8px;
+  }
+  .history-table th,
+  .history-table td {
+    padding: 8px 4px !important;
+    font-size: 0.75rem;
+  }
+  .score-badge {
+    padding: 2px 6px;
+    font-size: 0.72rem;
+  }
+}

@@ -53,6 +53,7 @@ export interface LeaderboardUser {
   username: string;
   totalPoints: number;
   role: string;
+  rank?: number;
 }
 
 @Injectable({
@@ -82,6 +83,12 @@ export class GameService {
 
   getLeaderboard(): Observable<LeaderboardUser[]> {
     return this.http.get<LeaderboardUser[]>(`${this.apiUrl}/leaderboard`, {
+      headers: this.authService.getAuthHeaders()
+    });
+  }
+
+  getPlayerPredictionsHistory(userId: string): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/leaderboard/${userId}/predictions`, {
       headers: this.authService.getAuthHeaders()
     });
   }
