@@ -11,11 +11,11 @@
     <div class="rules-quick-guide">
       <h4>Prediction Scoring Rules:</h4>
       <ul>
-        <li>🎯 <strong>+30 Points:</strong> Exact Scoreline Match (e.g., Pred: 2-1 | Actual: 2-1)</li>
-        <li>⚽️ <strong>+10 Points:</strong> Correct Outcome (e.g., Pred: 1-0 | Actual: 3-0)</li>
+        <li>🏆 <strong>+60 Points:</strong> Exact Tie Score & Penalty Shootout Match</li>
+        <li>🎯 <strong>+30 Points:</strong> Exact Full-Time Scoreline Match</li>
+        <li>⚽️ <strong>+10 Points:</strong> Correct Full-Time Outcome (Win/Loss/Draw)</li>
         <li>❌ <strong>+0 Points:</strong> Incorrect prediction</li>
-        <li>⏰ <em>Predictions lock exactly 60 minutes before kickoff.</em></li>
-        <li>⏰ <em>Prediction entry will be start before 24 hours of each match</em></li>
+        <li>⏰ <em>Predictions open 24 hours before kickoff and lock 1 hour before kickoff.</em></li>
       </ul>
     </div>
   </div>
@@ -121,10 +121,15 @@
             <span class="vs">VS</span>
           </ng-container>
           <ng-container *ngIf="match.status !== 'Upcoming'">
-            <div class="live-score">
-              <span class="score-digit">{{ match.scoreA }}</span>
-              <span class="score-dash">-</span>
-              <span class="score-digit">{{ match.scoreB }}</span>
+            <div class="live-score-container" style="display: flex; flex-direction: column; align-items: center;">
+              <div class="live-score">
+                <span class="score-digit">{{ match.scoreA }}</span>
+                <span class="score-dash">-</span>
+                <span class="score-digit">{{ match.scoreB }}</span>
+              </div>
+              <div class="penalty-score-settled" *ngIf="match.penaltyScoreA !== null && match.penaltyScoreA !== undefined" style="font-size: 0.72rem; color: var(--warning); font-weight: bold; margin-top: 2px;">
+                (Pen: {{ match.penaltyScoreA }} - {{ match.penaltyScoreB }})
+              </div>
             </div>
           </ng-container>
         </div>
@@ -155,16 +160,19 @@
             <span class="pred-label">Your prediction:</span>
             <span class="pred-value" *ngIf="match.myPrediction">
               {{ match.myPrediction.predScoreA }} - {{ match.myPrediction.predScoreB }}
+              <span *ngIf="match.myPrediction.predPenaltyScoreA !== null && match.myPrediction.predPenaltyScoreA !== undefined" style="font-size: 0.8rem; color: var(--text-secondary);">
+                (Pen: {{ match.myPrediction.predPenaltyScoreA }} - {{ match.myPrediction.predPenaltyScoreB }})
+              </span>
             </span>
             <span class="pred-value empty" *ngIf="!match.myPrediction">None</span>
           </div>
           
           <div class="points-earned">
-            <span class="points-badge" [class.exact]="match.myPrediction?.pointsEarned === 30" [class.outcome]="match.myPrediction?.pointsEarned === 10" [class.incorrect]="!match.myPrediction || match.myPrediction.pointsEarned === 0">
+            <span class="points-badge" [class.exact]="match.myPrediction?.pointsEarned === 60 || match.myPrediction?.pointsEarned === 30" [class.outcome]="match.myPrediction?.pointsEarned === 10" [class.incorrect]="!match.myPrediction || match.myPrediction.pointsEarned === 0">
               {{ match.myPrediction ? '+' + match.myPrediction.pointsEarned : '+0' }} PTS
             </span>
             <span class="points-reason">
-              {{ match.myPrediction?.pointsEarned === 30 ? 'Exact Scoreline Match' : (match.myPrediction?.pointsEarned === 10 ? 'Correct Outcome' : 'Incorrect prediction') }}
+              {{ match.myPrediction?.pointsEarned === 60 ? 'Exact Tie Score & Penalties Match' : (match.myPrediction?.pointsEarned === 30 ? 'Exact Scoreline Match' : (match.myPrediction?.pointsEarned === 10 ? 'Correct Outcome' : 'Incorrect prediction')) }}
             </span>
           </div>
         </div>
@@ -175,6 +183,9 @@
             <span class="pred-label">🔐 Your locked prediction:</span>
             <span class="pred-value highlight" *ngIf="match.myPrediction">
               {{ match.myPrediction.predScoreA }} - {{ match.myPrediction.predScoreB }}
+              <span *ngIf="match.myPrediction.predPenaltyScoreA !== null && match.myPrediction.predPenaltyScoreA !== undefined" style="font-size: 0.8rem; color: var(--text-secondary);">
+                (Pen: {{ match.myPrediction.predPenaltyScoreA }} - {{ match.myPrediction.predPenaltyScoreB }})
+              </span>
             </span>
             <span class="pred-value empty" *ngIf="!match.myPrediction">No prediction made</span>
           </div>
@@ -210,6 +221,30 @@
                 placeholder="-" 
                 [(ngModel)]="predInputsB[match._id]" 
                 class="form-control score-input">
+            </div>
+          </div>
+
+          <!-- If knockout and predicted tie, show penalty prediction inputs -->
+          <div class="penalty-inputs-row animate-fade" 
+            *ngIf="match.isKnockout && predInputsA[match._id] !== undefined && predInputsB[match._id] !== undefined && predInputsA[match._id] !== null && predInputsB[match._id] !== null && predInputsA[match._id] === predInputsB[match._id]" 
+            style="display: flex; flex-direction: column; align-items: center; gap: 6px; margin-top: 12px; background: rgba(245, 158, 11, 0.05); padding: 8px; border: 1px dashed var(--warning); border-radius: var(--border-radius-md);">
+            <span style="font-size: 0.75rem; color: var(--warning); font-weight: 700;">Predict Penalty Shootout Winner</span>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <input 
+                type="number" 
+                min="0" 
+                placeholder="Pen A" 
+                [(ngModel)]="predPenaltyInputsA[match._id]" 
+                class="form-control score-input" 
+                style="width: 70px; height: 32px; font-size: 0.9rem; padding: 4px; text-align: center;">
+              <span style="color: var(--text-muted); font-weight: bold;">-</span>
+              <input 
+                type="number" 
+                min="0" 
+                placeholder="Pen B" 
+                [(ngModel)]="predPenaltyInputsB[match._id]" 
+                class="form-control score-input" 
+                style="width: 70px; height: 32px; font-size: 0.9rem; padding: 4px; text-align: center;">
             </div>
           </div>
 

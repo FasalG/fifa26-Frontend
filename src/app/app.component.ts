@@ -28,14 +28,6 @@ export class AppComponent {
       this.isLightTheme.set(true);
       document.body.classList.add('light-theme');
     }
-
-    // Reactively watch auth changes to close mobile sidebar on navigation
-    effect(() => {
-      // Accessing logged in state
-      if (!this.authService.isLoggedIn()) {
-        this.isSidebarOpen.set(false);
-      }
-    });
   }
 
   toggleSidebar() {

@@ -57,6 +57,15 @@
       </a>
 
       <a 
+        routerLink="/knockout" 
+        routerLinkActive="active" 
+        (click)="closeSidebar()"
+        class="nav-item">
+        <span class="nav-icon">🌳</span>
+        <span class="nav-label">Knockout Stage</span>
+      </a>
+
+      <a 
         *ngIf="authService.isAdmin()"
         routerLink="/admin" 
         routerLinkActive="active" 

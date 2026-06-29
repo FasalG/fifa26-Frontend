@@ -1,10 +1,15 @@
 <div class="admin-container animate-fade">
-  <!-- <div class="header-section">
+  <div class="admin-header-toolbar glass-panel" style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; width: 100%;">
     <div>
-      <h2>Administrative Control Panel</h2>
-      <p class="subtitle">Manage groups, teams, fixtures, players, and settle match scores</p>
+      <h2 style="margin: 0;">Administrative Control Panel</h2>
+      <p class="subtitle" style="margin: 0; color: var(--text-muted); font-size: 0.9rem;">Manage groups, teams, fixtures, players, and settle match scores</p>
     </div>
-  </div> -->
+    <div>
+      <button (click)="generateKnockout()" class="btn btn-accent" [disabled]="isGeneratingKnockout">
+        ⚡ {{ isGeneratingKnockout ? 'Syncing Knockout...' : 'Sync Knockout Fixtures from Web' }}
+      </button>
+    </div>
+  </div>
 
   <!-- Messages -->
   <div *ngIf="successMessage()" class="alert alert-success">
@@ -580,7 +585,6 @@
                   {{ match.status === 'Completed' ? 'Recalculate' : 'Settle' }}
                 </button>
                 <button 
-                 
                   (click)="shareMatchPredictionsToWhatsApp(match)" 
                   title="Share Match Results on WhatsApp" 
                   class="btn btn-icon whatsapp-share">
@@ -594,7 +598,6 @@
                   ⏰
                 </button>
                 <button 
-              
                   (click)="shareAllPredictionsToWhatsApp(match)" 
                   title="Share All Player Predictions on WhatsApp" 
                   class="btn btn-icon whatsapp-all-preds">
@@ -603,6 +606,30 @@
                 <button (click)="editFixture(match)" title="Edit Fixture" class="btn btn-icon edit">✏️</button>
                 <button (click)="deleteFixture(match._id)" title="Delete Fixture" class="btn btn-icon delete">🗑️</button>
               </div>
+            </div>
+
+            <!-- Shootout inputs for knockout tie -->
+            <div class="penalty-settle-row animate-fade" 
+              *ngIf="match.isKnockout && settleScoreA[match._id] !== undefined && settleScoreB[match._id] !== undefined && settleScoreA[match._id] !== null && settleScoreB[match._id] !== null && settleScoreA[match._id] === settleScoreB[match._id]" 
+              style="display: flex; justify-content: center; align-items: center; gap: 8px; margin: 10px auto; background: rgba(245, 158, 11, 0.05); padding: 8px 16px; border: 1px dashed var(--warning); border-radius: var(--border-radius-sm); max-width: 320px;">
+              <span style="font-size: 0.8rem; color: var(--warning); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Shootout:</span>
+              <input 
+                type="number" 
+                min="0" 
+                placeholder="Pen A"
+                [(ngModel)]="settlePenaltyScoreA[match._id]" 
+                class="form-control" 
+                style="width: 75px; height: 36px; font-size: 0.95rem; text-align: center; padding: 4px;"
+                [disabled]="settlingIds[match._id]">
+              <span style="color: var(--text-muted); font-weight: bold;">-</span>
+              <input 
+                type="number" 
+                min="0" 
+                placeholder="Pen B"
+                [(ngModel)]="settlePenaltyScoreB[match._id]" 
+                class="form-control" 
+                style="width: 75px; height: 36px; font-size: 0.95rem; text-align: center; padding: 4px;"
+                [disabled]="settlingIds[match._id]">
             </div>
 
             <div class="row-details">

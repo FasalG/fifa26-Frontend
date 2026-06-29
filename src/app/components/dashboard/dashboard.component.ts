@@ -25,6 +25,8 @@ export class DashboardComponent implements OnInit {
   // Dictionaries to store inline inputs
   predInputsA: { [key: string]: number } = {};
   predInputsB: { [key: string]: number } = {};
+  predPenaltyInputsA: { [key: string]: number } = {};
+  predPenaltyInputsB: { [key: string]: number } = {};
   submittingIds: { [key: string]: boolean } = {};
 
   displayedFixtures = computed(() => {
@@ -114,6 +116,12 @@ export class DashboardComponent implements OnInit {
           if (fixture.myPrediction) {
             this.predInputsA[fixture._id] = fixture.myPrediction.predScoreA;
             this.predInputsB[fixture._id] = fixture.myPrediction.predScoreB;
+            if (fixture.myPrediction.predPenaltyScoreA !== null && fixture.myPrediction.predPenaltyScoreA !== undefined) {
+              this.predPenaltyInputsA[fixture._id] = fixture.myPrediction.predPenaltyScoreA;
+            }
+            if (fixture.myPrediction.predPenaltyScoreB !== null && fixture.myPrediction.predPenaltyScoreB !== undefined) {
+              this.predPenaltyInputsB[fixture._id] = fixture.myPrediction.predPenaltyScoreB;
+            }
           }
         });
         this.isLoading.set(false);
@@ -129,14 +137,27 @@ export class DashboardComponent implements OnInit {
   submitPrediction(fixture: Fixture) {
     const scoreA = this.predInputsA[fixture._id];
     const scoreB = this.predInputsB[fixture._id];
+    const penaltyScoreA = this.predPenaltyInputsA[fixture._id] !== undefined && this.predPenaltyInputsA[fixture._id] !== null ? Number(this.predPenaltyInputsA[fixture._id]) : null;
+    const penaltyScoreB = this.predPenaltyInputsB[fixture._id] !== undefined && this.predPenaltyInputsB[fixture._id] !== null ? Number(this.predPenaltyInputsB[fixture._id]) : null;
 
     if (scoreA === undefined || scoreB === undefined || scoreA === null || scoreB === null || scoreA < 0 || scoreB < 0) {
       this.showTemporaryAlert('Please enter valid, non-negative scores.', 'error');
       return;
     }
 
+    if (fixture.isKnockout && Number(scoreA) === Number(scoreB)) {
+      if (penaltyScoreA === null || penaltyScoreB === null || penaltyScoreA < 0 || penaltyScoreB < 0) {
+        this.showTemporaryAlert('A draw prediction in a knockout match requires predicting the penalty shootout score.', 'error');
+        return;
+      }
+      if (penaltyScoreA === penaltyScoreB) {
+        this.showTemporaryAlert('A penalty shootout prediction cannot end in a draw. One team must win.', 'error');
+        return;
+      }
+    }
+
     this.submittingIds[fixture._id] = true;
-    this.gameService.submitPrediction(fixture._id, scoreA, scoreB).subscribe({
+    this.gameService.submitPrediction(fixture._id, scoreA, scoreB, penaltyScoreA, penaltyScoreB).subscribe({
       next: (res) => {
         this.submittingIds[fixture._id] = false;
         this.showTemporaryAlert(res.message, 'success');

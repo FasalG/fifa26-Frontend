@@ -10,6 +10,8 @@ export interface Prediction {
   matchId: string;
   predScoreA: number;
   predScoreB: number;
+  predPenaltyScoreA?: number | null;
+  predPenaltyScoreB?: number | null;
   pointsEarned: number;
   timestamp: string;
 }
@@ -24,8 +26,11 @@ export interface Fixture {
   status: 'Upcoming' | 'Live' | 'Completed';
   scoreA: number | null;
   scoreB: number | null;
+  penaltyScoreA?: number | null;
+  penaltyScoreB?: number | null;
   winner: 'A' | 'B' | 'Tie' | null;
   isLocked: boolean;
+  isKnockout?: boolean;
   myPrediction: Prediction | null;
 }
 
@@ -73,10 +78,16 @@ export class GameService {
     });
   }
 
-  submitPrediction(matchId: string, predScoreA: number, predScoreB: number): Observable<{ message: string; prediction: Prediction }> {
+  submitPrediction(
+    matchId: string,
+    predScoreA: number,
+    predScoreB: number,
+    predPenaltyScoreA?: number | null,
+    predPenaltyScoreB?: number | null
+  ): Observable<{ message: string; prediction: Prediction }> {
     return this.http.post<{ message: string; prediction: Prediction }>(
       `${this.apiUrl}/predictions`,
-      { matchId, predScoreA, predScoreB },
+      { matchId, predScoreA, predScoreB, predPenaltyScoreA, predPenaltyScoreB },
       { headers: this.authService.getAuthHeaders() }
     );
   }
@@ -105,10 +116,24 @@ export class GameService {
     });
   }
 
-  settleMatch(matchId: string, scoreA: number, scoreB: number): Observable<any> {
+  settleMatch(
+    matchId: string,
+    scoreA: number,
+    scoreB: number,
+    penaltyScoreA?: number | null,
+    penaltyScoreB?: number | null
+  ): Observable<any> {
     return this.http.post<any>(
       `${this.apiUrl}/admin/settle-match`,
-      { matchId, scoreA, scoreB },
+      { matchId, scoreA, scoreB, penaltyScoreA, penaltyScoreB },
+      { headers: this.authService.getAuthHeaders() }
+    );
+  }
+
+  generateKnockout(): Observable<any> {
+    return this.http.post<any>(
+      `${this.apiUrl}/admin/generate-knockout`,
+      {},
       { headers: this.authService.getAuthHeaders() }
     );
   }

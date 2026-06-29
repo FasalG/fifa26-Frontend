@@ -102,7 +102,10 @@ export class AdminComponent implements OnInit {
   // Settlement Inputs Map
   settleScoreA: { [key: string]: number } = {};
   settleScoreB: { [key: string]: number } = {};
+  settlePenaltyScoreA: { [key: string]: number } = {};
+  settlePenaltyScoreB: { [key: string]: number } = {};
   settlingIds: { [key: string]: boolean } = {};
+  isGeneratingKnockout = false;
 
   // Status Alerts
   successMessage = signal<string | null>(null);
@@ -148,6 +151,12 @@ export class AdminComponent implements OnInit {
               if (f.scoreA !== null && f.scoreB !== null) {
                 this.settleScoreA[f._id] = f.scoreA;
                 this.settleScoreB[f._id] = f.scoreB;
+              }
+              if (f.penaltyScoreA !== null && f.penaltyScoreA !== undefined) {
+                this.settlePenaltyScoreA[f._id] = f.penaltyScoreA;
+              }
+              if (f.penaltyScoreB !== null && f.penaltyScoreB !== undefined) {
+                this.settlePenaltyScoreB[f._id] = f.penaltyScoreB;
               }
             });
 
@@ -580,14 +589,27 @@ export class AdminComponent implements OnInit {
   settleMatch(fixture: Fixture) {
     const scoreA = this.settleScoreA[fixture._id];
     const scoreB = this.settleScoreB[fixture._id];
+    const penaltyScoreA = this.settlePenaltyScoreA[fixture._id] !== undefined && this.settlePenaltyScoreA[fixture._id] !== null ? Number(this.settlePenaltyScoreA[fixture._id]) : null;
+    const penaltyScoreB = this.settlePenaltyScoreB[fixture._id] !== undefined && this.settlePenaltyScoreB[fixture._id] !== null ? Number(this.settlePenaltyScoreB[fixture._id]) : null;
 
     if (scoreA === undefined || scoreB === undefined || scoreA === null || scoreB === null || scoreA < 0 || scoreB < 0) {
       this.showAlert('Please enter valid, non-negative scores to settle the match.', 'error');
       return;
     }
 
+    if (fixture.isKnockout && Number(scoreA) === Number(scoreB)) {
+      if (penaltyScoreA === null || penaltyScoreB === null || penaltyScoreA < 0 || penaltyScoreB < 0) {
+        this.showAlert('A tie in a knockout match requires valid penalty shootout scores.', 'error');
+        return;
+      }
+      if (penaltyScoreA === penaltyScoreB) {
+        this.showAlert('A penalty shootout cannot end in a draw. One team must win.', 'error');
+        return;
+      }
+    }
+
     this.settlingIds[fixture._id] = true;
-    this.gameService.settleMatch(fixture._id, scoreA, scoreB).subscribe({
+    this.gameService.settleMatch(fixture._id, scoreA, scoreB, penaltyScoreA, penaltyScoreB).subscribe({
       next: () => {
         this.settlingIds[fixture._id] = false;
         this.showAlert(`Match #${fixture.matchNumber} settled! Leaderboard updated and WhatsApp alert sent.`, 'success');
@@ -596,6 +618,25 @@ export class AdminComponent implements OnInit {
       error: (err) => {
         this.settlingIds[fixture._id] = false;
         this.showAlert(err.error?.message || 'Error settling match.', 'error');
+      }
+    });
+  }
+
+  generateKnockout() {
+    this.isGeneratingKnockout = true;
+    this.errorMessage.set(null);
+    this.successMessage.set(null);
+
+    this.gameService.generateKnockout().subscribe({
+      next: (res) => {
+        this.isGeneratingKnockout = false;
+        this.showAlert(`Knockout bracket synced: ${res.createdCount} created, ${res.updatedCount} updated.`, 'success');
+        this.loadData();
+      },
+      error: (err) => {
+        console.error(err);
+        this.showAlert(err.error?.message || 'Failed to generate knockout bracket.', 'error');
+        this.isGeneratingKnockout = false;
       }
     });
   }

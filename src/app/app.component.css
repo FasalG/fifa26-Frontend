@@ -8,8 +8,7 @@
 /* AUTHENTICATED DESKTOP LAYOUT */
 @media (min-width: 769px) {
   .app-layout.authenticated {
-    display: grid;
-    grid-template-columns: var(--sidebar-width) 1fr;
+    display: block;
   }
 
   .sidebar-aside {
