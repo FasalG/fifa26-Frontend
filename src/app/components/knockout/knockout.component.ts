@@ -407,10 +407,10 @@ interface KnockoutRound {
     .rounds-track {
       display: flex;
       transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-      width: 500%; /* For 5 columns, each takes 100% width on mobile, or 20% on desktop (customised via media query) */
+      width: 100%;
     }
     .round-column {
-      width: 20%; /* 100% on mobile, 20% on desktop (since total track is 500%) */
+      width: 100%;
       padding: 0 12px;
       flex-shrink: 0;
     }
@@ -1067,7 +1067,7 @@ export class KnockoutComponent implements OnInit {
   getTrackTransform(): string {
     const idx = this.activeRoundIndex();
     // In mobile, we slide by -100% per active index. On desktop, transform is disabled via CSS transform: none !important.
-    return `translateX(-${idx * 20}%)`;
+    return `translateX(-${idx * 100}%)`;
   }
 
   // Logo helpers
